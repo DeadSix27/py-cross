@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import argparse
 import datetime
 import hashlib
 import importlib
@@ -34,51 +35,10 @@ from pathlibex import Path
 from ansimarkup import ansistring
 
 
-class Colors:
-    """ANSI color codes"""
-
-    BLACK = "\033[0;30m"
-    RED = "\033[0;31m"
-    GREEN = "\033[0;32m"
-    BROWN = "\033[0;33m"
-    BLUE = "\033[0;34m"
-    PURPLE = "\033[0;35m"
-    CYAN = "\033[0;36m"
-    LIGHT_GRAY = "\033[0;37m"
-    DARK_GRAY = "\033[1;30m"
-    LIGHT_RED = "\033[1;31m"
-    LIGHT_GREEN = "\033[1;32m"
-    YELLOW = "\033[1;33m"
-    LIGHT_BLUE = "\033[1;34m"
-    LIGHT_PURPLE = "\033[1;35m"
-    LIGHT_CYAN = "\033[1;36m"
-    LIGHT_WHITE = "\033[1;37m"
-    BOLD = "\033[1m"
-    FAINT = "\033[2m"
-    ITALIC = "\033[3m"
-    UNDERLINE = "\033[4m"
-    BLINK = "\033[5m"
-    NEGATIVE = "\033[7m"
-    CROSSED = "\033[9m"
-    END = "\033[0m"
-
-
 class MyLogFormatter(logging.Formatter):
     def __init__(self, l, ld):
         MyLogFormatter.log_format = l
         MyLogFormatter.log_date_format = ld
-        # MyLogFormatter.inf_fmt = (
-        #     Colors.LIGHTCYAN_EX + MyLogFormatter.log_format + Colors.RESET
-        # )
-        # MyLogFormatter.err_fmt = (
-        #     Colors.LIGHTRED_EX + MyLogFormatter.log_format + Colors.RESET
-        # )
-        # MyLogFormatter.dbg_fmt = (
-        #     Colors.LIGHTYELLOW_EX + MyLogFormatter.log_format + Colors.RESET
-        # )
-        # MyLogFormatter.war_fmt = (
-        #     Colors.YELLOW + MyLogFormatter.log_format + Colors.RESET
-        # )*
         super().__init__(
             fmt="%(levelno)d: %(msg)s",
             datefmt=MyLogFormatter.log_date_format,
@@ -90,84 +50,26 @@ class MyLogFormatter(logging.Formatter):
             record.type = ""
         else:
             record.type = "[" + record.type.upper() + "]"  # type: ignore
-            # record.type = ansistring(record.type)
 
         if record.levelno == logging.DEBUG:
+            record.levelname = f"<grey>{record.levelname}</grey>"
             record.msg = f"<grey>{record.msg}</grey>"
         elif record.levelno == logging.INFO:
+            record.levelname = f"<cyan>{record.levelname}</cyan>"
             record.msg = f"<cyan>{record.msg}</cyan>"
         elif record.levelno == logging.ERROR:
+            record.levelname = f"<light-red>{record.levelname}</light-red>"
             record.msg = f"<light-red>{record.msg}</light-red>"
         elif record.levelno == logging.WARNING:
+            record.levelname = (
+                f"<light-yellow>{record.levelname}</light-yellow>"
+            )
             record.msg = f"<light-yellow>{record.msg}</light-yellow>"
 
-        # record.msg = ansistring(record.msg)
-
         self._style._fmt = MyLogFormatter.log_format
-        # # format_orig = self._style._fmt
         result = logging.Formatter.format(self, record)
-
         result = ansistring(result)
-        # self._style._fmt = format_orig
         return result
-
-
-# class MyLogFormatter(logging.Formatter):
-#     def __init__(self, l, ld):
-#         MyLogFormatter.log_format = l
-#         MyLogFormatter.log_date_format = ld
-#         # MyLogFormatter.inf_fmt = (
-#         #     Colors.LIGHTCYAN_EX + MyLogFormatter.log_format + Colors.RESET
-#         # )
-#         # MyLogFormatter.err_fmt = (
-#         #     Colors.LIGHTRED_EX + MyLogFormatter.log_format + Colors.RESET
-#         # )
-#         # MyLogFormatter.dbg_fmt = (
-#         #     Colors.LIGHTYELLOW_EX + MyLogFormatter.log_format + Colors.RESET
-#         # )
-#         # MyLogFormatter.war_fmt = (
-#         #     Colors.YELLOW + MyLogFormatter.log_format + Colors.RESET
-#         # )
-#         super().__init__(
-#             fmt="%(levelno)d: %(msg)s",
-#             datefmt=MyLogFormatter.log_date_format,
-#             style="%",
-#         )
-
-#     def format(self, record):
-#         if not hasattr(record, "type"):
-#             record.type = ""
-#         else:
-#             record.type = "[" + record.type.upper() + "]"  # type: ignore
-
-#         format_orig = self._style._fmt
-#         # if record.levelno == logging.DEBUG:
-#         #     self._style._fmt = MyLogFormatter.dbg_fmt
-#         # elif record.levelno == logging.INFO:
-#         #     self._style._fmt = MyLogFormatter.inf_fmt
-#         # elif record.levelno == logging.ERROR:
-#         #     self._style._fmt = MyLogFormatter.err_fmt
-#         # elif record.levelno == logging.WARNING:
-#         #     self._style._fmt = MyLogFormatter.war_fmt
-#         result = logging.Formatter.format(self, record)
-#         self._style._fmt = format_orig
-#         return result
-
-
-class WarnDefaultDict(defaultdict):
-    def __init__(self, default, logger):
-        super().__init__(default)
-        self.logger = logger
-
-    def __missing__(self, key):
-        self.logger.warning(f"Unknown variable {key}, ignoring")
-        return f"{{{key}}}"
-
-
-class TimeFilter(logging.Filter):
-    def filter(self, record):
-        record.created = datetime.datetime.now().timestamp()
-        return True
 
 
 class CrossCompiler:
@@ -175,7 +77,6 @@ class CrossCompiler:
         hdlr = logging.StreamHandler(sys.stdout)
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(hdlr)
-        self.logger.addFilter(TimeFilter())
         self.logger.setLevel(logging.INFO)
         fmt = MyLogFormatter(
             "<light-cyan>[%(asctime)s][%(levelname)s]</light-cyan>%(type)s %(message)s",
@@ -241,7 +142,6 @@ class CrossCompiler:
             f"CXX={self.mingwPrefixStrDash}g++",
         )
 
-        # self.formatDict = WarnDefaultDict(lambda: "", self.logger)
         self.formatDict = {
             "bitness": self.bitnessStr,
             "bitness_win": self.bitnessStrWin,
@@ -290,18 +190,49 @@ class CrossCompiler:
         self.loadPackages()
         self.sanityCheckPackages()
 
+        self.parseCommandLine()
+
         self.buildMinGWToolchain()
         self.createCmakeToolchainFile()
         self.createMesonEnvFile()
         self.createCargoHome()
         self.setDefaultEnv()
 
-        self.buildPackages(self.packages[sys.argv[1]])
-        exit()
+    def parseCommandLine(self):
+        parser = argparse.ArgumentParser(description="Py Cross")
 
-        for pkg_name, pkg in self.packages.items():
-            print(pkg_name, end="\n" * 4 + str(pkg.depends) + "\n" * 4)
-            self.buildPackages(pkg)
+        # Add required positional argument
+        parser.add_argument(
+            "packages",
+            nargs="+",
+            help="Single package or list of package to build",
+        )
+
+        # Add optional arguments
+        parser.add_argument(
+            "-d", "--debug", action="store_true", help="Enable debug mode"
+        )
+        parser.add_argument(
+            "-w",
+            "--wait",
+            action="store_true",
+            help="Wait after each build step until confirmation",
+        )
+
+        # Parse arguments
+        args = parser.parse_args()
+
+        if args.packages:
+            non_existing = []
+            for p in args.packages:
+                p = p.lower()
+                if not p in self.packages:
+                    non_existing.append(p)
+        if non_existing:
+            self.logger.error(
+                f"The package(s): {'; '.join([f'<u>{s}</u>' for s in non_existing])}, do not exist."
+            )
+            exit(1)
 
     def aquireLocalPkgConfigPath(self):
         possiblePathsStr = (
@@ -371,8 +302,12 @@ class CrossCompiler:
         os.environ["PKG_CONFIG_LIBDIR"] = ""
         os.environ["PKG_CONFIG_PATH"] = str(self.pkgConfigPath)
         os.environ["COLOR"] = "ON"  # Force coloring on (for CMake primarily)
-        os.environ["CLICOLOR_FORCE"] = "ON"  # Force coloring on (for CMake primarily)
-        os.environ["CFLAGS"] = "-Ofast -march=znver3 -mtune=znver3"  # Force coloring on (for CMake primarily)
+        os.environ[
+            "CLICOLOR_FORCE"
+        ] = "ON"  # Force coloring on (for CMake primarily)
+        os.environ[
+            "CFLAGS"
+        ] = "-Ofast -march=znver3 -mtune=znver3"  # Force coloring on (for CMake primarily)
         # os.environ["CMAKE_SYSTEM_IGNORE_PATH"] = "/;/usr;/usr/local"
 
         # os.environ["MESON_CMAKE_TOOLCHAIN_FILE"] = str(self.cmakeToolchainFile)
