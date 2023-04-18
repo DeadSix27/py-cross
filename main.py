@@ -8,10 +8,10 @@ import importlib.util
 import io
 import logging
 
-try:
-    import msvcrt  # For Windows systems #type: ignore
-except ImportError:
-    import getch  # For Unix-like systems #type: ignore
+# try:
+#     import msvcrt  # For Windows systems #type: ignore
+# except ImportError:
+#     import getch  # For Unix-like systems #type: ignore
 import os
 import re
 import shlex
@@ -1012,22 +1012,22 @@ class CrossCompiler:
                     )
                     self.runProcess(["autoreconf", "-vi"])
 
-    def display_message(self, message):
-        return
-        """Display message in console and wait for any key to be pressed"""
-        sys.stdout.write(message)
-        sys.stdout.flush()
-        # Wait for a single key press
-        try:
-            if sys.platform.startswith("win"):
-                # For Windows systems, use msvcrt.getch()
-                msvcrt.getch()
-            else:
-                # For Unix-like systems, use getch.getch()
-                getch.getch()
-        except KeyboardInterrupt:
-            # Handle the user pressing Ctrl-C by exiting the function
-            pass
+    # def display_message(self, message):
+    #     return
+    #     """Display message in console and wait for any key to be pressed"""
+    #     sys.stdout.write(message)
+    #     sys.stdout.flush()
+    #     # Wait for a single key press
+    #     try:
+    #         if sys.platform.startswith("win"):
+    #             # For Windows systems, use msvcrt.getch()
+    #             msvcrt.getch()
+    #         else:
+    #             # For Unix-like systems, use getch.getch()
+    #             getch.getch()
+    #     except KeyboardInterrupt:
+    #         # Handle the user pressing Ctrl-C by exiting the function
+    #         pass
 
     def aquirePackage(self, package: BasePackage):
         packageDir = package.path
