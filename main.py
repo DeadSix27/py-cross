@@ -185,6 +185,8 @@ class CrossCompiler:
 
         self.parseCommandLine()
 
+        self.buildPackages(self.packages["mpv"])
+
 
     def parseCommandLine(self):
         parser = argparse.ArgumentParser(description="Py Cross")
@@ -222,7 +224,6 @@ class CrossCompiler:
 
         if args.list:
             self.printPackageList()
-        exit()
 
     def printPackageList(self):
         maxNameLength = len(max(self.packages.keys(), key=len)) +1
@@ -450,7 +451,7 @@ class CrossCompiler:
             if nextline == b"" and process.poll() is not None:
                 break
             line_str = nextline.decode("utf-8", "ignore")
-            sys.stdout.write(line_str, end="")
+            sys.stdout.write(line_str + "\n")
 
         if process.stdout:
             process.stdout.close()
@@ -930,8 +931,6 @@ class CrossCompiler:
         self.logger.info(f"Moving into package folder: {packageDir}")
         os.chdir(packageDir)
 
-        self.display_message("Continue with patch?")
-
         if sourceUpdated:
             self.patchPackage(package)
             if len(package.regex_replace):
@@ -985,8 +984,6 @@ class CrossCompiler:
                     ):
                         self.autogenConfigure(package)
 
-            self.display_message("Continue with conf?")
-
         if package.env:
             for envVar in package.env.keys():
                 envVarFormatted = self.format_variable_str(package.env[envVar])
@@ -1004,8 +1001,6 @@ class CrossCompiler:
                 pass
             package.path.joinpath("_already_conf").touch()
 
-            self.display_message("Continue with build?")
-
         if not package.path.joinpath("_already_build").exists():
             if package.build_system == BasePackage.BuildSystem.Ninja:
                 self.ninjaMakePackage(package)
@@ -1019,8 +1014,6 @@ class CrossCompiler:
             package.path.joinpath("_already_build").touch()
 
             package.post_build_commands()
-
-            self.display_message("Continue with install?")
 
         if not package.path.joinpath("_already_install").exists():
             if package.install_system == BasePackage.BuildSystem.Ninja:
