@@ -8,12 +8,8 @@ import importlib
 import importlib.util
 import io
 import logging
-
-# try:
-#     import msvcrt  # For Windows systems #type: ignore
-# except ImportError:
-#     import getch  # For Unix-like systems #type: ignore
 import os
+from pyclbr import Class
 import re
 import shlex
 import shutil
@@ -21,18 +17,17 @@ import subprocess
 import sys
 import tarfile
 import urllib.request
-from collections import defaultdict
 from pprint import pprint as pp
-from typing import Any, List, Optional, Tuple, Union, final
+from typing import List, Tuple, Union
 from urllib.parse import urlparse
 
 import progressbar
 import requests
+from ansimarkup import ansistring
+import packages
 
 from packages.base_package import BasePackage
 from pathlibex import Path
-
-from ansimarkup import ansistring
 
 
 class MyLogFormatter(logging.Formatter):
@@ -61,9 +56,7 @@ class MyLogFormatter(logging.Formatter):
             record.levelname = f"<light-red>{record.levelname}</light-red>"
             record.msg = f"<light-red>{record.msg}</light-red>"
         elif record.levelno == logging.WARNING:
-            record.levelname = (
-                f"<light-yellow>{record.levelname}</light-yellow>"
-            )
+            record.levelname = f"<light-yellow>{record.levelname}</light-yellow>"
             record.msg = f"<light-yellow>{record.msg}</light-yellow>"
 
         self._style._fmt = MyLogFormatter.log_format
@@ -100,13 +93,9 @@ class CrossCompiler:
         self.mingwPrefixStr = f"{self.xArchPrefixStr}-w64-mingw32"
         self.mingwPrefixStrDash = f"{self.xArchPrefixStr}-w64-mingw32-"
         self.toolchainRootPath = self.workPath.joinpath("toolchain")
-        self.toolchainPathOne = self.toolchainRootPath.joinpath(
-            self.mingwPrefixStr
-        )
+        self.toolchainPathOne = self.toolchainRootPath.joinpath(self.mingwPrefixStr)
         self.toolchainBinPathOne = self.toolchainPathOne.joinpath("bin")
-        self.toolchainPathTwo = self.toolchainPathOne.joinpath(
-            self.mingwPrefixStr
-        )
+        self.toolchainPathTwo = self.toolchainPathOne.joinpath(self.mingwPrefixStr)
         self.pkgConfigPath = self.toolchainPathTwo.joinpath("lib/pkgconfig")
         self.toolchainBinPathTwo = self.toolchainPathTwo.joinpath("bin")
         self.crossPrefix = self.toolchainPathTwo
@@ -119,15 +108,15 @@ class CrossCompiler:
 
         self.localPkgConfigPath = self.aquireLocalPkgConfigPath()
 
-        self.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0"
+        self.userAgent = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0"
+        )
 
         self.bitnessStr = "x86_64"
         self.bitnessStrWin = "win64"
         self.bitnessStrNum = "64"
 
-        self.cmakeToolchainFile = self.workPath.joinpath(
-            "mingw_toolchain.cmake"
-        )
+        self.cmakeToolchainFile = self.workPath.joinpath("mingw_toolchain.cmake")
         self.cargoHomePath = self.workPath.joinpath("cargohome")
         self.mesonEnvFile = self.workPath.joinpath("meson_environment.ini")
         self.mesonNativeFile = self.workPath.joinpath("meson_native.ini")
@@ -149,9 +138,7 @@ class CrossCompiler:
             "toolchain_path_one": str(self.toolchainPathOne),
             "arch_string": self.xArchPrefixStr,
             "target_prefix": str(self.crossPrefix),
-            "target_prefix_sed_escaped": str(self.crossPrefix).replace(
-                "/", "\\/"
-            ),
+            "target_prefix_sed_escaped": str(self.crossPrefix).replace("/", "\\/"),
             "toolchain_bin_path_one": str(self.toolchainBinPathOne),
             "mingw_prefix": str(self.mingwPrefixStr),
             "mingw_prefix_dash": str(self.mingwPrefixStrDash),
@@ -190,28 +177,26 @@ class CrossCompiler:
         self.loadPackages()
         self.sanityCheckPackages()
 
-        self.parseCommandLine()
-
         self.buildMinGWToolchain()
         self.createCmakeToolchainFile()
         self.createMesonEnvFile()
         self.createCargoHome()
         self.setDefaultEnv()
 
+        self.parseCommandLine()
+
+
     def parseCommandLine(self):
         parser = argparse.ArgumentParser(description="Py Cross")
 
-        # Add required positional argument
         parser.add_argument(
             "packages",
-            nargs="+",
+            nargs="?",
             help="Single package or list of package to build",
         )
 
-        # Add optional arguments
-        parser.add_argument(
-            "-d", "--debug", action="store_true", help="Enable debug mode"
-        )
+        parser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
+        parser.add_argument("-l", "--list", action="store_true", help="List all packages")
         parser.add_argument(
             "-w",
             "--wait",
@@ -219,20 +204,34 @@ class CrossCompiler:
             help="Wait after each build step until confirmation",
         )
 
-        # Parse arguments
         args = parser.parse_args()
 
-        if args.packages:
+        if args.packages and len(args.packages):
             non_existing = []
             for p in args.packages:
                 p = p.lower()
                 if not p in self.packages:
                     non_existing.append(p)
-        if non_existing:
-            self.logger.error(
-                f"The package(s): {'; '.join([f'<u>{s}</u>' for s in non_existing])}, do not exist."
-            )
-            exit(1)
+            if non_existing:
+                self.logger.error(
+                    f"The package(s): {'; '.join([f'<u>{s}</u>' for s in non_existing])}, do not exist."
+                )
+                exit(1)
+
+            exit()
+
+        if args.list:
+            self.printPackageList()
+        exit()
+
+    def printPackageList(self):
+        maxNameLength = len(max(self.packages.keys(), key=len)) +1
+        for (name, pkg) in self.packages.items():
+            pkg: BasePackage
+            link = pkg.url
+            if pkg.source_type == BasePackage.SourceType.Archive:
+                link = pkg.mirrors[0]["url"]
+            print(f'Name: {name:<{maxNameLength}} Link: {link:<{80}}')
 
     def aquireLocalPkgConfigPath(self):
         possiblePathsStr = (
@@ -264,19 +263,17 @@ class CrossCompiler:
         return ":".join(str(x) for x in possiblePaths)
 
     def buildPackages(self, pkg):
-        print(f"Building {pkg.name}")
+        self.logger.info(f"Building {pkg.name}")
         if pkg.name in self.packagesBuilt:
             if self.packagesBuilt[pkg.name]:
-                print(f"{pkg.name} already built")
+                self.logger.info(f"{pkg.name} already built")
                 return
             else:
-                raise Exception(
-                    f"Error building {pkg.name}: circular dependency detected."
-                )
+                raise Exception(f"Error building {pkg.name}: circular dependency detected.")
         self.packagesBuilt[pkg.name] = False
 
         if len(pkg.depends) > 0:
-            print(f"{pkg.name} depends on {pkg.depends}")
+            self.logger.info(f"{pkg.name} depends on {pkg.depends}")
             for pkg_name in pkg.depends:
                 if pkg_name not in self.packages:
                     raise Exception(
@@ -288,23 +285,19 @@ class CrossCompiler:
         try:
             self.buildPackage(pkg)
             self.packagesBuilt[pkg.name] = True
-            print(f"{pkg.name} built successfully")
+            self.logger.info(f"{pkg.name} built successfully")
         except:
             self.packagesBuilt[pkg.name] = False
             raise
 
     def setDefaultEnv(self):
-        os.environ[
-            "PATH"
-        ] = f"{self.toolchainBinPathOne}:{self.originalEnv['PATH']}"
+        os.environ["PATH"] = f"{self.toolchainBinPathOne}:{self.originalEnv['PATH']}"
         os.environ["CARGO_HOME"] = str(self.cargoHomePath)
 
         os.environ["PKG_CONFIG_LIBDIR"] = ""
         os.environ["PKG_CONFIG_PATH"] = str(self.pkgConfigPath)
         os.environ["COLOR"] = "ON"  # Force coloring on (for CMake primarily)
-        os.environ[
-            "CLICOLOR_FORCE"
-        ] = "ON"  # Force coloring on (for CMake primarily)
+        os.environ["CLICOLOR_FORCE"] = "ON"  # Force coloring on (for CMake primarily)
         os.environ[
             "CFLAGS"
         ] = "-Ofast -march=znver3 -mtune=znver3"  # Force coloring on (for CMake primarily)
@@ -355,21 +348,19 @@ class CrossCompiler:
     def handleRegexReplace(self, rp, packageName):
         cwd = Path(os.getcwd())
         if "in_file" not in rp:
-            print(
+            self.logger.error(
                 f"The regex_replace command in the package {packageName}:\n{rp}\nMisses the in_file parameter."
             )
             exit(1)
         if 0 not in rp:
-            print(
+            self.logger.error(
                 f'A regex_replace command in the package {packageName}\nrequires at least the "0" key to be a RegExpression, if 1 is not defined matching lines will be removed.'
             )
             exit(1)
 
         in_files = rp["in_file"]
         if isinstance(in_files, (list, tuple)):
-            in_files = (
-                cwd.joinpath(self.format_variable_str(x)) for x in in_files
-            )
+            in_files = (cwd.joinpath(self.format_variable_str(x)) for x in in_files)
         else:
             in_files = (cwd.joinpath(self.format_variable_str(in_files)),)
 
@@ -388,20 +379,13 @@ class CrossCompiler:
                 out_files = (_current_infile,)
                 shutil.copy(
                     _current_infile,
-                    _current_infile.parent.joinpath(
-                        _current_infile.name + ".backup"
-                    ),
+                    _current_infile.parent.joinpath(_current_infile.name + ".backup"),
                 )
             else:
                 if isinstance(rp["out_file"], (list, tuple)):
-                    out_files = (
-                        cwd.joinpath(self.format_variable_str(x))
-                        for x in rp["out_file"]
-                    )
+                    out_files = (cwd.joinpath(self.format_variable_str(x)) for x in rp["out_file"])
                 else:
-                    out_files = (
-                        cwd.joinpath(self.format_variable_str(rp["out_file"])),
-                    )
+                    out_files = (cwd.joinpath(self.format_variable_str(rp["out_file"])),)
 
             for _current_outfile in out_files:
                 if not _current_infile.exists():
@@ -410,51 +394,32 @@ class CrossCompiler:
                     )
 
                 if _current_outfile == _current_infile:
-                    _backup = _current_infile.parent.joinpath(
-                        _current_infile.name + ".backup"
-                    )
+                    _backup = _current_infile.parent.joinpath(_current_infile.name + ".backup")
                     if not _backup.parent.exists():
                         self.logger.warning(
                             f"[Regex-Command] Out-File parent '{_backup.parent}' does not exist."
                         )
                     shutil.copy(_current_infile, _backup)
-                    _tmp_file = _current_infile.parent.joinpath(
-                        _current_infile.name + ".tmp"
-                    )
+                    _tmp_file = _current_infile.parent.joinpath(_current_infile.name + ".tmp")
                     shutil.move(_current_infile, _tmp_file)
                     _current_infile = _tmp_file
-                self.logger.info(
-                    f"[{packageName}] Running regex command on '{_current_outfile}'"
-                )
+                self.logger.info(f"[{packageName}] Running regex command on '{_current_outfile}'")
 
                 with open(_current_infile, "r") as f:
-                    # input_file_content = f.read()
-                    # print("Input file content:", input_file_content)
-
-                    f.seek(
-                        0
-                    )  # reset the file pointer to the beginning of the file
                     with open(_current_outfile, "w") as nf:
                         for line in f:
                             if re.search(repls[0], line) and len(repls) > 1:
                                 self.logger.info(f"RegEx replacing line")
-                                self.logger.info(
-                                    f"in {_current_outfile}\n{line}\nwith:"
-                                )
+                                self.logger.info(f"in {_current_outfile}\n{line}\nwith:")
                                 line = re.sub(repls[0], repls[1], line)
                                 self.logger.info(f"\n{line}")
                                 nf.write(line)
                             elif re.search(repls[0], line):
-                                self.logger.info(
-                                    f"RegEx removing line\n{line}:"
-                                )
+                                self.logger.info(f"RegEx removing line\n{line}:")
                             else:
-                                # print(repls[0])
                                 nf.write(line)
 
-    def runProcess(
-        self, args, ignore_errors=False, exit_on_error=True, inputFile=None
-    ) -> int:
+    def runProcess(self, args, ignore_errors=False, exit_on_error=True, inputFile=None) -> int:
         if not isinstance(args, tuple) and not isinstance(args, list):
             raise ValueError("only tuple/list accepted")
 
@@ -478,14 +443,14 @@ class CrossCompiler:
             process.stdin.close()
 
         if process.stderr is None and process.stdout is None:
-            raise Exception("meh")
+            raise Exception("stderr and stdout are empty.")
 
         while process.stdout is not None:
             nextline = process.stdout.readline()
             if nextline == b"" and process.poll() is not None:
                 break
             line_str = nextline.decode("utf-8", "ignore")
-            print(line_str, end="")
+            sys.stdout.write(line_str, end="")
 
         if process.stdout:
             process.stdout.close()
@@ -505,16 +470,12 @@ class CrossCompiler:
     def svnHasNewCommits(self, pkg: BasePackage):
         # Get local revision using svn info command
         local_info = os.popen("svn info").read().strip()
-        local_rev_match = re.search(
-            r"^Revision:\s*(\d+)", local_info, re.MULTILINE
-        )
+        local_rev_match = re.search(r"^Revision:\s*(\d+)", local_info, re.MULTILINE)
         local_rev = local_rev_match.group(1) if local_rev_match else ""
 
         # Get remote revision using svn info command with package URL
         remote_info = os.popen(f"svn info {pkg.url}").read().strip()
-        remote_rev_match = re.search(
-            r"^Revision:\s*(\d+)", remote_info, re.MULTILINE
-        )
+        remote_rev_match = re.search(r"^Revision:\s*(\d+)", remote_info, re.MULTILINE)
         remote_rev = remote_rev_match.group(1) if remote_rev_match else ""
         return local_rev != remote_rev
 
@@ -538,11 +499,7 @@ class CrossCompiler:
     def gitHasNewCommits(self):
         localCommit = os.popen("git rev-parse HEAD").read().strip()
         remoteCommit = (
-            os.popen("git ls-remote -q . HEAD")
-            .read()
-            .strip()
-            .split("\n")[0]
-            .split("\t")[0]
+            os.popen("git ls-remote -q . HEAD").read().strip().split("\n")[0].split("\t")[0]
         )
         return not localCommit == remoteCommit
 
@@ -573,19 +530,13 @@ class CrossCompiler:
         cloneCmd.append(cloneUrl)
         cloneCmd.append(str(package.path))
 
-        self.logger.info(
-            f"Cloning {package.name} with '{shlex.join(cloneCmd)}'"
-        )
+        self.logger.info(f"Cloning {package.name} with '{shlex.join(cloneCmd)}'")
         self.runProcess(cloneCmd)
         return True
 
     def hgHasNewCommits(self):
-        localRevision = (
-            os.popen("hg identify --debug").read().strip().split()[0]
-        )
-        remoteRevision = (
-            os.popen("hg identify -r default --debug").read().strip().split()[0]
-        )
+        localRevision = os.popen("hg identify --debug").read().strip().split()[0]
+        remoteRevision = os.popen("hg identify -r default --debug").read().strip().split()[0]
         return not localRevision == remoteRevision
 
     def hgClone(self, package: BasePackage):
@@ -598,9 +549,7 @@ class CrossCompiler:
                 os.chdir(_olddir)
                 return True
             else:
-                self.logger.info(
-                    f"Mercurial repo for {package.name} is up to date"
-                )
+                self.logger.info(f"Mercurial repo for {package.name} is up to date")
             os.chdir(_olddir)
             return False
         cmd = ["hg", "clone", "-v", cloneUrl, str(package.path)]
@@ -639,9 +588,7 @@ class CrossCompiler:
         def get_file_progress_file_object_class(on_progress, pb):
             class FileProgressFileObject(tarfile.ExFileObject):
                 def read(self, size, *args):
-                    on_progress(
-                        self.name, self.position, self.size, pb
-                    )  # type:ignore
+                    on_progress(self.name, self.position, self.size, pb)  # type:ignore
                     return tarfile.ExFileObject.read(self, size, *args)
 
             return FileProgressFileObject
@@ -668,25 +615,17 @@ class CrossCompiler:
             " ",
             progressbar.Percentage(),
             " ",
-            progressbar.Bar(
-                fill=chr(9617), marker=chr(9608), left="[", right="]"
-            ),
+            progressbar.Bar(fill=chr(9617), marker=chr(9608), left="[", right="]"),
             " ",
             progressbar.DataSize(),
             "/",
             progressbar.DataSize(variable="max_value"),
             # " "*filler,
         ]
-        pbar = progressbar.ProgressBar(
-            widgets=widgets, maxval=os.path.getsize(filename)
-        )
+        pbar = progressbar.ProgressBar(widgets=widgets, maxval=os.path.getsize(filename))
         pbar.start()
-        tarfile.TarFile.fileobject = get_file_progress_file_object_class(
-            on_progress, pbar
-        )
-        tar = tarfile.open(
-            fileobj=ProgressFileObject(filename, pbar), mode="r:*"
-        )
+        tarfile.TarFile.fileobject = get_file_progress_file_object_class(on_progress, pbar)
+        tar = tarfile.open(fileobj=ProgressFileObject(filename, pbar), mode="r:*")
         # outputPath = os.path.commonprefix(tar.getnames())
         if os.path.isfile(outputPath):
             tar.close()
@@ -694,9 +633,7 @@ class CrossCompiler:
             return outputPath
         else:
             members = tar.getmembers()
-            if len(members) == 1 and members[0].name != Path(
-                filename
-            ).stem.rstrip(".tar"):
+            if len(members) == 1 and members[0].name != Path(filename).stem.rstrip(".tar"):
                 base_path = members[0].name
             else:
                 base_path = Path(filename).stem.rstrip(".tar")
@@ -718,52 +655,42 @@ class CrossCompiler:
         for mirror in package.mirrors:
             url = mirror["url"]
             self.logger.info(f"Downloading {package.name} from '{url}'")
-            try:
-                f = self.downloadFile(url, outputPath=path)
-                hashes = mirror["hashes"]
-                for h in hashes:  # type:ignore
-                    self.logger.info("Comparing hashes..")
-                    hashReturn = self.verifyHash(f, h)
-                    if hashReturn[0] is True:
-                        self.logger.info(
-                            "Hashes matched: {0}...{1} (local) == {2}...{3} (remote)".format(
-                                hashReturn[1][0:5],
-                                hashReturn[1][-5:],
-                                hashReturn[2][0:5],
-                                hashReturn[2][-5:],
-                            )
+            f = self.downloadFile(url, outputPath=path)
+            hashes = mirror["hashes"]
+            for h in hashes:  # type:ignore
+                self.logger.info("Comparing hashes..")
+                hashReturn = self.verifyHash(f, h)
+                if hashReturn[0] is True:
+                    self.logger.info(
+                        "Hashes matched: {0}...{1} (local) == {2}...{3} (remote)".format(
+                            hashReturn[1][0:5],
+                            hashReturn[1][-5:],
+                            hashReturn[2][0:5],
+                            hashReturn[2][-5:],
                         )
-                        return (False, f)
-                    else:
-                        self.logger.error(
-                            "File hashes didn't match: %s(local) != %s(remote)"
-                            % (hashReturn[1], hashReturn[2])
-                        )
-                        raise Exception("File download error: Hash mismatch")
-                        exit(1)
-            except Exception as e:
-                print(e)
-                continue
+                    )
+                    return (False, f)
+                else:
+                    self.logger.error(
+                        "File hashes didn't match: %s(local) != %s(remote)"
+                        % (hashReturn[1], hashReturn[2])
+                    )
+                    raise Exception("File download error: Hash mismatch")
+                    exit(1)
         return None
 
     def format_variable_str(self, in_str: str):
         if not isinstance(in_str, str):
             raise ValueError(f"The input is not a string: {in_str}")
         matches = re.findall(r"\{([^{}]+)\}|\!CMD\(([^)]+)\)CMD\!", in_str)
-        modified_str = (
-            in_str  # create a new variable to store the modified string
-        )
+        modified_str = in_str  # create a new variable to store the modified string
         for var, cmd in matches:
             if var:
                 if var in self.formatDict:
                     modified_var = self.formatDict[var]
-                    if isinstance(modified_var, list) or isinstance(
-                        modified_var, tuple
-                    ):
+                    if isinstance(modified_var, list) or isinstance(modified_var, tuple):
                         modified_var = self.format_variable_list(modified_var)
-                        if isinstance(modified_var, list) or isinstance(
-                            modified_var, tuple
-                        ):
+                        if isinstance(modified_var, list) or isinstance(modified_var, tuple):
                             return modified_var
                     elif not isinstance(modified_var, str):
                         raise ValueError(
@@ -776,9 +703,7 @@ class CrossCompiler:
                         modified_str,
                     )
             elif cmd:
-                cmd_output = (
-                    subprocess.check_output(cmd, shell=True).decode().strip()
-                )
+                cmd_output = subprocess.check_output(cmd, shell=True).decode().strip()
                 modified_str = re.sub(
                     r"\!CMD\(" + re.escape(cmd) + r"\)CMD\!",
                     cmd_output,
@@ -826,9 +751,7 @@ class CrossCompiler:
                 f"Input must be a list or a tuple of strings, not {type(str_obj)} [{str_obj}]"
             )
 
-    def formatVariableStr(
-        self, strLst: Union[List[str], Tuple[str]]
-    ) -> Tuple[str]:
+    def formatVariableStr(self, strLst: Union[List[str], Tuple[str]]) -> Tuple[str]:
         if not strLst:
             return tuple(strLst)
 
@@ -839,9 +762,7 @@ class CrossCompiler:
 
         for s in strLst:
             s: str
-            matches = re.findall(
-                r"(\{([a-zA-Z0-9_\-]+)\})|(\!CMD\(([^\)]+)\)CMD\!)", s
-            )
+            matches = re.findall(r"(\{([a-zA-Z0-9_\-]+)\})|(\!CMD\(([^\)]+)\)CMD\!)", s)
             if matches:
                 for match in matches:
                     if match[0]:
@@ -853,19 +774,7 @@ class CrossCompiler:
                             s = re.sub(r"\{[a-zA-Z0-9_\-]+\}", replaceVar, s)
                             formattedStrings.append(s)
                     elif match[2]:
-                        cmd_output = (
-                            subprocess.check_output(match[3], shell=True)
-                            .decode()
-                            .strip()
-                        )
-                        print()
-                        print()
-                        print()
-                        print(cmd_output)
-                        print()
-                        print()
-                        print()
-
+                        cmd_output = subprocess.check_output(match[3], shell=True).decode().strip()
                         s = re.sub(r"\!CMD\(([^\)]+)\)CMD\!", cmd_output, s)
                         formattedStrings.append(s)
             else:
@@ -873,9 +782,7 @@ class CrossCompiler:
 
         return tuple(formattedStrings)
 
-    def formatVariableStrO2(
-        self, strLst: Union[List[str], Tuple[str]]
-    ) -> Tuple[str]:
+    def formatVariableStrO2(self, strLst: Union[List[str], Tuple[str]]) -> Tuple[str]:
         if not strLst:
             return tuple(strLst)
 
@@ -921,9 +828,7 @@ class CrossCompiler:
                             group1.append(x)
                         formattedStrings.extend(group1)
                     else:
-                        formattedStrings.append(
-                            re.sub(r"\{[a-zA-Z0-9_\-]+\}", replaceVar, s)
-                        )
+                        formattedStrings.append(re.sub(r"\{[a-zA-Z0-9_\-]+\}", replaceVar, s))
             else:
                 formattedStrings.append(s)
         return tuple(formattedStrings)
@@ -932,19 +837,13 @@ class CrossCompiler:
         if pkg.autogen:
             if pkg.autogen_only_reconf:
                 self.runProcess(["autoreconf", "-vi"])
-                self.logger.info(
-                    f"Running only autoreconf for {pkg.name} in {os.getcwd()}"
-                )
+                self.logger.info(f"Running only autoreconf for {pkg.name} in {os.getcwd()}")
             else:
                 if pkg.path.joinpath("autogen.sh").exists():
-                    self.logger.info(
-                        f"Running autogen for {pkg.name} in {os.getcwd()}"
-                    )
+                    self.logger.info(f"Running autogen for {pkg.name} in {os.getcwd()}")
                     self.runProcess(["./autogen.sh"])
                 else:
-                    self.logger.info(
-                        f"Running autoreconf for {pkg.name} in {os.getcwd()}"
-                    )
+                    self.logger.info(f"Running autoreconf for {pkg.name} in {os.getcwd()}")
                     self.runProcess(["autoreconf", "-vi"])
 
     # def display_message(self, message):
@@ -982,9 +881,7 @@ class CrossCompiler:
                 os.unlink(archive[1])
                 return True
             else:
-                self.logger.info(
-                    f"Archive from {package.name} already downloaded and extracted"
-                )
+                self.logger.info(f"Archive from {package.name} already downloaded and extracted")
                 self.packagesBuilt[package.name] = True
                 return False
 
@@ -1024,9 +921,7 @@ class CrossCompiler:
                 self.logger.info(
                     f"Backing up env var {envVar} = {'None' if envVar not in os.environ else os.environ[envVar]}"
                 )
-                originalEnv[envVar] = (
-                    None if envVar not in os.environ else os.environ[envVar]
-                )
+                originalEnv[envVar] = None if envVar not in os.environ else os.environ[envVar]
 
         packageDir = package.path
 
@@ -1046,7 +941,7 @@ class CrossCompiler:
                         try:
                             self.handleRegexReplace(r, package.name)
                         except re.error as e:
-                            print("errormeh", e)
+                            self.logger.error(e)
                             exit(1)
                 _pos = "post_download"
                 if _pos in package.regex_replace:
@@ -1054,7 +949,7 @@ class CrossCompiler:
                         try:
                             self.handleRegexReplace(r, package.name)
                         except re.error as e:
-                            print("errormeh", e)
+                            self.logger.error(e)
                             exit(1)
             package.post_regex_replace_cmd()
             package.post_download_commands()
@@ -1071,9 +966,7 @@ class CrossCompiler:
                         self.autogenConfigure(package)
 
         if package.get_source_subfolder is not None:
-            self.logger.info(
-                f"Moving into package build folder: {package.get_source_subfolder}"
-            )
+            self.logger.info(f"Moving into package build folder: {package.get_source_subfolder}")
             if not package.get_source_subfolder.exists():
                 package.get_source_subfolder.mkdir()
             os.chdir(package.get_source_subfolder)  # type: ignore
@@ -1087,18 +980,9 @@ class CrossCompiler:
             ):
                 if package.conf_system == BasePackage.ConfSystem.Autoconf:
                     if (
-                        not package.get_source_subfolder_combined.joinpath(
-                            "Configure"
-                        ).exists()
-                        and not package.get_source_subfolder_combined.joinpath(
-                            "configure"
-                        ).exists()
+                        not package.get_source_subfolder_combined.joinpath("Configure").exists()
+                        and not package.get_source_subfolder_combined.joinpath("configure").exists()
                     ):
-                        print(
-                            package.get_source_subfolder_combined.joinpath(
-                                "configure"
-                            )
-                        )
                         self.autogenConfigure(package)
 
             self.display_message("Continue with conf?")
@@ -1106,15 +990,8 @@ class CrossCompiler:
         if package.env:
             for envVar in package.env.keys():
                 envVarFormatted = self.format_variable_str(package.env[envVar])
-                self.logger.info(
-                    f"Setting env var {envVar} to {envVarFormatted}"
-                )
+                self.logger.info(f"Setting env var {envVar} to {envVarFormatted}")
                 os.environ[envVar] = envVarFormatted
-
-        # print("### Environment variables:  ###")
-        # for tk in os.environ:
-        #     print("\t" + tk + " : " + os.environ[tk])
-        # print("##############################")
 
         if not package.path.joinpath("_already_conf").exists():
             if package.conf_system == BasePackage.ConfSystem.CMake:
@@ -1163,7 +1040,7 @@ class CrossCompiler:
                         try:
                             self.handleRegexReplace(r, package.name)
                         except re.error as e:
-                            print("errormeh", e)
+                            self.logger.error(e)
                             exit(1)
 
         if package.env:
@@ -1173,9 +1050,7 @@ class CrossCompiler:
                         self.logger.info(f"Deleting env var {envVar}")
                         del os.environ[envVar]
                     elif originalEnv[envVar]:
-                        self.logger.info(
-                            f"Restoring env var {envVar} to {originalEnv[envVar]}"
-                        )
+                        self.logger.info(f"Restoring env var {envVar} to {originalEnv[envVar]}")
                         os.environ[envVar] = originalEnv[envVar]
 
         self.packagesBuilt[package.name] = True
@@ -1196,9 +1071,7 @@ class CrossCompiler:
         mainCmd = cmd[0]
         if not package.path.joinpath(mainCmd).executeable():
             cmd = ["sh"] + cmd
-            self.logger.warning(
-                "configure command is not executeable, using SH"
-            )
+            self.logger.warning("configure command is not executeable, using SH")
 
         self.runProcess(cmd + list(package.config))
 
@@ -1214,41 +1087,31 @@ class CrossCompiler:
 
     def cargoBuildPackage(self, package):
         bconf = package.build
-        self.logger.info(
-            f"Cargo C-Building {package.name} with '{' '.join(bconf)}'"
-        )
+        self.logger.info(f"Cargo C-Building {package.name} with '{' '.join(bconf)}'")
         result = subprocess.run(list(package.cargo_command) + list(bconf))
         if result.returncode != 0:
-            print(f"Command failed with return code {result.returncode}")
+            self.logger.error(f"Command failed with return code {result.returncode}")
             exit(1)
 
     def autoconfMakePackage(self, package):
         bconf = package.build
         cmd = list(package.make_command) + list(bconf)
-        self.logger.info(
-            f"Autoconf Building {package.name} with '{shlex.join(cmd)}'"
-        )
+        self.logger.info(f"Autoconf Building {package.name} with '{shlex.join(cmd)}'")
         self.runProcess(cmd)
 
     def autoconfInstallPackage(self, package):
         iconf = package.install
-        self.logger.info(
-            f"Autoconf Installing {package.name} with '{' '.join(iconf)}'"
-        )
+        self.logger.info(f"Autoconf Installing {package.name} with '{' '.join(iconf)}'")
         self.runProcess(list(package.make_install_command) + list(iconf))
 
     def ninjaMakePackage(self, package):
         bconf = package.build
-        self.logger.info(
-            f"Ninja Building {package.name} with '{' '.join(bconf)}'"
-        )
+        self.logger.info(f"Ninja Building {package.name} with '{' '.join(bconf)}'")
         self.runProcess(list(package.ninja_command) + list(bconf))
 
     def ninjaInstallPackage(self, package):
         iconf = package.install
-        self.logger.info(
-            f"Ninja Installing {package.name} with '{' '.join(iconf)}'"
-        )
+        self.logger.info(f"Ninja Installing {package.name} with '{' '.join(iconf)}'")
         self.runProcess(list(package.ninja_command) + list(iconf))
 
     def applyPatchv2(self, patchData):
@@ -1259,9 +1122,7 @@ class CrossCompiler:
             os.chdir(patchData["dir"])
             self.logger.debug("Moving to patch folder: {0}".format(os.getcwd()))
 
-        self.logger.debug(
-            "Applying patch '{0}' in '{1}'".format(url, os.getcwd())
-        )
+        self.logger.debug("Applying patch '{0}' in '{1}'".format(url, os.getcwd()))
 
         patchTouchName = "patch_%s.done" % (self.md5(url))
 
@@ -1273,9 +1134,7 @@ class CrossCompiler:
         pUrl = urlparse(url)
         if pUrl.scheme != "":
             fileName = os.path.basename(pUrl.path)
-            self.logger.info(
-                "Downloading patch '{0}' to: {1}".format(url, fileName)
-            )
+            self.logger.info("Downloading patch '{0}' to: {1}".format(url, fileName))
             self.downloadFile(url, fileName)
         else:
             local_patch_path = os.path.join(self.fullPatchDir, url)
@@ -1283,9 +1142,7 @@ class CrossCompiler:
             if os.path.isfile(local_patch_path):
                 copyPath = os.path.join(os.getcwd(), fileName)
                 self.logger.info(
-                    "Copying patch from '{0}' to '{1}'".format(
-                        local_patch_path, copyPath
-                    )
+                    "Copying patch from '{0}' to '{1}'".format(local_patch_path, copyPath)
                 )
                 shutil.copyfile(local_patch_path, copyPath)
             else:
@@ -1310,9 +1167,7 @@ class CrossCompiler:
     def touch(self, f):
         Path(f).touch()
 
-    def downloadFile(
-        self, url=None, outputFileName=None, outputPath=None, bytesMode=False
-    ):
+    def downloadFile(self, url=None, outputFileName=None, outputPath=None, bytesMode=False):
         def fmt_size(num, suffix="B"):
             for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
                 if abs(num) < 1024.0:
@@ -1328,9 +1183,7 @@ class CrossCompiler:
             outputPath = os.getcwd()
         else:
             if not os.path.isdir(outputPath):
-                raise Exception(
-                    'Specified path "{0}" does not exist'.format(outputPath)
-                )
+                raise Exception('Specified path "{0}" does not exist'.format(outputPath))
 
         fileName = os.path.basename(url)  # Get URL filename
         userAgent = self.userAgent
@@ -1355,7 +1208,7 @@ class CrossCompiler:
             try:
                 shutil.copyfile(url, fullOutputPath)
             except Exception as e:
-                print(e)
+                self.logger.error(e)
                 exit(1)
             return fullOutputPath
 
@@ -1365,9 +1218,7 @@ class CrossCompiler:
             req.raise_for_status()
 
         if "content-disposition" in req.headers:
-            reSponse = re.findall(
-                "filename=(.+)", req.headers["content-disposition"]
-            )
+            reSponse = re.findall("filename=(.+)", req.headers["content-disposition"])
             if reSponse is None:
                 fileName = os.path.basename(url)
             else:
@@ -1383,9 +1234,7 @@ class CrossCompiler:
                 compressed = True
 
         self.logger.info(
-            "Requesting : {0} - {1}".format(
-                url, fmt_size(size) if size is not None else "?"
-            )
+            "Requesting : {0} - {1}".format(url, fmt_size(size) if size is not None else "?")
         )
 
         # terms = shutil.get_terminal_size((100,100))
@@ -1410,9 +1259,7 @@ class CrossCompiler:
             " ",
             progressbar.Percentage(),
             " ",
-            progressbar.Bar(
-                fill=chr(9617), marker=chr(9608), left="[", right="]"
-            ),
+            progressbar.Bar(fill=chr(9617), marker=chr(9608), left="[", right="]"),
             " ",
             progressbar.DataSize(),
             "/",
@@ -1425,9 +1272,7 @@ class CrossCompiler:
         ]
         pbar = None
         if size is None:
-            pbar = progressbar.ProgressBar(
-                widgets=widgetsNoSize, maxval=progressbar.UnknownLength
-            )
+            pbar = progressbar.ProgressBar(widgets=widgetsNoSize, maxval=progressbar.UnknownLength)
         else:
             pbar = progressbar.ProgressBar(widgets=widgets, maxval=size)
 
@@ -1477,9 +1322,7 @@ class CrossCompiler:
         pkg: BasePackage
         for pkg_name, pkg in self.packages.items():
             if pkg_name in pkg.depends:
-                self.logger.error(
-                    f"Package {pkg_name} depends on itself, which is not valid."
-                )
+                self.logger.error(f"Package {pkg_name} depends on itself, which is not valid.")
                 exit(1)
             if len(pkg.depends):
                 for pkg_depend in pkg.depends:
@@ -1491,10 +1334,7 @@ class CrossCompiler:
 
     def loadPackages(self):
         pkg_dir = "packages"
-        print("Loading Packages")
-
-        # Add the main directory to the system path^
-
+        self.logger.info("Loading Packages")
         for file_name in os.listdir(pkg_dir):
             if file_name.endswith(".py"):
                 module_name = file_name[:-3]
@@ -1515,8 +1355,9 @@ class CrossCompiler:
                             ):
                                 self.packages[obj.name] = obj(self)
                         except TypeError as e:
-                            # print(traceback.format_exc())
                             pass
+        # Sort by alphabet
+        self.packages = dict(sorted(self.packages.items(), key=lambda x: x[1].name))
 
     def createCargoHome(self):
         if not os.path.isdir(self.cargoHomePath):
@@ -1533,25 +1374,18 @@ class CrossCompiler:
             ]
             with open(cargoConfigPath, "w") as f:
                 f.write("\n".join(tcFile))
-            self.logger.info(
-                "Wrote Cargo Home config.toml in '%s'" % (self.cargoHomePath)
-            )
+            self.logger.info("Wrote Cargo Home config.toml in '%s'" % (self.cargoHomePath))
 
-            self.logger.info(
-                "Setting up cargo toolchain in '%s'" % (self.cargoHomePath)
-            )
+            self.logger.info("Setting up cargo toolchain in '%s'" % (self.cargoHomePath))
 
             result = subprocess.run(["cargo", "install", "cargo-c"])
             if result.returncode != 0:
-                print(f"Command failed with return code {result.returncode}")
+                self.logger.error(f"Command failed with return code {result.returncode}")
                 exit(1)
 
     def createCmakeToolchainFile(self):
         if not os.path.isfile(self.cmakeToolchainFile):
-            self.logger.info(
-                "Creating CMake Toolchain file at: '%s'"
-                % (self.cmakeToolchainFile)
-            )
+            self.logger.info("Creating CMake Toolchain file at: '%s'" % (self.cmakeToolchainFile))
             tcFile = [
                 f"set(CMAKE_SYSTEM_NAME Windows)",
                 f"set(CMAKE_SYSTEM_PROCESSOR {self.bitnessStr})",
@@ -1576,9 +1410,7 @@ class CrossCompiler:
 
     def createMesonEnvFile(self):
         if not os.path.isfile(self.mesonEnvFile):
-            self.logger.info(
-                "Creating Meson Environment file at: '%s'" % (self.mesonEnvFile)
-            )
+            self.logger.info("Creating Meson Environment file at: '%s'" % (self.mesonEnvFile))
             meFile = (
                 "[binaries]\n",
                 f"c = '{self.mingwPrefixStrDash}gcc'",
@@ -1642,24 +1474,18 @@ class CrossCompiler:
             gccOutput = subprocess.check_output(
                 gccBin + " -v", shell=True, stderr=subprocess.STDOUT
             ).decode("utf-8")
-            workingGcc = re.compile(
-                "^Target: .*-w64-mingw32$", re.MULTILINE
-            ).findall(gccOutput)
+            workingGcc = re.compile("^Target: .*-w64-mingw32$", re.MULTILINE).findall(gccOutput)
             if len(workingGcc) > 0:
                 self.logger.info("MinGW-w64 install is working!")
                 return
             else:
-                raise Exception(
-                    "GCC is not working properly, target is not mingw32."
-                )
+                raise Exception("GCC is not working properly, target is not mingw32.")
                 exit(1)
 
         def toolchainBuildStatus(logMessage):
             self.logger.info(logMessage)
 
-        mod = importlib.import_module(
-            "mingw_toolchain_script.mingw_toolchain_script"
-        )
+        mod = importlib.import_module("mingw_toolchain_script.mingw_toolchain_script")
 
         # from mingw_toolchain_script.mingw_toolchain_script import MinGW64ToolChainBuilder
 
