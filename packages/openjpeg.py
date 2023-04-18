@@ -13,6 +13,21 @@ class OPENJPEG(BasePackage): #todo, fix the annoying left behind .exe in lib\cma
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
 
+        self.regex_replace = {
+            "post_download":
+            [
+                {
+                    0: r"^install\(EXPORT OpenJPEGTargets.+",
+                    "in_file": "CMakeLists.txt",
+                },
+                {
+                    0: r"install\(\s+FILES\s+\${OPENJPEG_BINARY_DIR}\/OpenJPEGConfig\.cmake\n\s+DESTINATION\s+\${OPENJPEG_INSTALL_PACKAGE_DIR}\n\)",
+                    "in_file": "CMakeLists.txt",
+                    "multiline": True,
+                },
+            ]
+        }
+
     @property
     def pkg_depends(self):
         return ( "zlib", "libpng", "libtiff" )
