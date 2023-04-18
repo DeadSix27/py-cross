@@ -451,7 +451,7 @@ class CrossCompiler:
             if nextline == b"" and process.poll() is not None:
                 break
             line_str = nextline.decode("utf-8", "ignore")
-            sys.stdout.write(line_str + "\n")
+            sys.stdout.write(line_str)
 
         if process.stdout:
             process.stdout.close()

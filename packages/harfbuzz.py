@@ -25,7 +25,7 @@ class HARFBUZZ(BasePackage): #todo: fix stdc++
 
     @property
     def pkg_depends(self):
-        return ( "brotli", )
+        return ["brotli"]
     
     @property
     def pkg_url(self):
@@ -41,7 +41,7 @@ class HARFBUZZ(BasePackage): #todo: fix stdc++
             '-Ddocs=disabled',
             '-Ddoc_tests=false',
             '-Dgdi=enabled',
-            '-Dfreetype=enabled',
+            '-Dfreetype=disabled',
             '-Ddirectwrite=enabled',
             '-Dicu_builtin=false',
             '-Dutilities=disabled',
