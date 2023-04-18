@@ -13,10 +13,6 @@ class HARFBUZZ(BasePackage): #todo: fix stdc++
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
 
-        self.patches = [
-            {"file": "0001-meson-add-an-option-to-disable-utilities-building.patch" },
-        ]
-
         self.regex_replace = {
 			"post_install": [
 				{
