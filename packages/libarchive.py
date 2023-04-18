@@ -19,8 +19,8 @@ class libarchive(BasePackage):
         self.regex_replace = {
             "post_install": [
                 {
-                    0: r"Libs.private:  -lz -llzma -llzo2 -lcrypto -liconv -lcharset -lexpat\n",
-                    1: r"Libs.private:  -lz -llzma -llzo2 -lcrypto -lbcrypt -ltls -lws2_32 -liconv -lcharset -lexpat\n",
+                    0: r"Libs.private:  -lz -lbz2 -llzma -llzo2 -lcrypto -liconv -lcharset -lexpat\n",
+                    1: r"Libs.private:  -lz -lbz2 -llzma -llzo2 -lcrypto -ltls -lws2_32 -liconv -lcharset -lexpat\n",
                     "in_file": "{pkg_config_path}/libarchive.pc",
                 },
             ]
