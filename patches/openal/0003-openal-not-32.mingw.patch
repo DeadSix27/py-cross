@@ -1,0 +1,16 @@
+diff -Nur openal-soft/CMakeLists.txt openal-soft.not32/CMakeLists.txt
+--- openal-soft/CMakeLists.txt	2018-01-30 17:28:52.006735588 +0100
++++ openal-soft.not32/CMakeLists.txt	2018-01-30 17:28:48.902896015 +0100
+@@ -1216,7 +1216,11 @@
+ IF(NOT WIN32)
+     SET(LIBNAME "openal")
+ ELSE()
+-    SET(LIBNAME "OpenAL32")
++    IF(MINGW)
++        SET(LIBNAME "openal")
++    ELSE()
++        SET(LIBNAME "OpenAL32")
++    ENDIF()
+ ENDIF()
+ 
+ # Needed for openal.pc.in

@@ -1,0 +1,13 @@
+diff --git a/src/openssl.c b/src/openssl.c
+index c18b5050..917641c1 100644
+--- a/src/openssl.c
++++ b/src/openssl.c
+@@ -106,7 +106,7 @@ init_prng (void)
+     RAND_egd (opt.egd_file);
+ #endif
+ 
+-#ifdef WINDOWS
++#if defined(WINDOWS) && !defined(__MINGW32__)
+   /* Under Windows, we can try to seed the PRNG using screen content.
+      This may or may not work, depending on whether we'll calling Wget
+      interactively.  */

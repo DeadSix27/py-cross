@@ -1,0 +1,30 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+    ],
+    "settings": {
+        "python.analysis.exclude": [
+            "work",
+            "patches",
+            "install",
+            "__pycache__",
+        ],
+        "search.exclude": {
+            "**/work": true,
+            "**/install": true,
+            "**/node_modules": true,
+            "**/bower_components": true,
+            "**/*.code-search": true
+        },
+        "files.watcherExclude": {
+            "**/install": true,
+            "**/work": true,
+            "**/.git/objects/**": true,
+            "**/.git/subtree-cache/**": true,
+            "**/node_modules/*/**": true,
+            "**/.hg/store/**": true
+        }
+    }
+}

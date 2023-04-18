@@ -1,0 +1,64 @@
+From 58d5a090964687083071c8efb81b20e8df4994f9 Mon Sep 17 00:00:00 2001
+From: DeadSix <DeadSix27@users.noreply.github.com>
+Date: Sun, 21 Aug 2022 20:01:32 +0200
+Subject: [PATCH] fix-mingw-build
+
+---
+ include/FLAC++/export.h    | 2 +-
+ include/FLAC/export.h      | 2 +-
+ src/libFLAC++/flac++.pc.in | 2 +-
+ src/libFLAC/flac.pc.in     | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/include/FLAC++/export.h b/include/FLAC++/export.h
+index e672e8f0..eb7f69e0 100644
+--- a/include/FLAC++/export.h
++++ b/include/FLAC++/export.h
+@@ -61,7 +61,7 @@
+  * build static, shared or **both**. Therefore, DLL_EXPORT, which is set
+  * by libtool, must override FLAC__NO_DLL on building shared components
+  */
+-#if defined(_WIN32)
++#if defined(_MSC_VER)
+ 
+ #if defined(FLAC__NO_DLL) && !(defined(DLL_EXPORT))
+ #define FLACPP_API
+diff --git a/include/FLAC/export.h b/include/FLAC/export.h
+index cde72b73..e7614f58 100644
+--- a/include/FLAC/export.h
++++ b/include/FLAC/export.h
+@@ -61,7 +61,7 @@
+  * build static, shared or **both**. Therefore, DLL_EXPORT, which is set
+  * by libtool, must override FLAC__NO_DLL on building shared components
+  */
+-#if defined(_WIN32)
++#if defined(_MSC_VER)
+ 
+ #if defined(FLAC__NO_DLL) && !(defined(DLL_EXPORT))
+ #define FLAC_API
+diff --git a/src/libFLAC++/flac++.pc.in b/src/libFLAC++/flac++.pc.in
+index f09c251a..b1958307 100644
+--- a/src/libFLAC++/flac++.pc.in
++++ b/src/libFLAC++/flac++.pc.in
+@@ -7,5 +7,5 @@ Name: FLAC++
+ Description: Free Lossless Audio Codec Library (C++ API)
+ Version: @VERSION@
+ Requires: flac
+-Libs: -L${libdir} -lFLAC++
++Libs: -L${libdir} -lFLAC++ -lssp
+ Cflags: -I${includedir}
+diff --git a/src/libFLAC/flac.pc.in b/src/libFLAC/flac.pc.in
+index 56e8594e..2a98ecf2 100644
+--- a/src/libFLAC/flac.pc.in
++++ b/src/libFLAC/flac.pc.in
+@@ -7,6 +7,6 @@ Name: FLAC
+ Description: Free Lossless Audio Codec Library
+ Version: @VERSION@
+ Requires.private: @OGG_PACKAGE@
+-Libs: -L${libdir} -lFLAC
++Libs: -L${libdir} -lFLAC -lssp
+ Libs.private: -lm
+ Cflags: -I${includedir}
+-- 
+2.37.2
+

@@ -1,0 +1,11 @@
+diff '--color=auto' -Nur twolame/Makefile.am twolame.patch/Makefile.am
+--- twolame/Makefile.am	2023-04-15 21:14:43.618768071 +0200
++++ twolame.patch/Makefile.am	2023-04-15 21:23:41.180029779 +0200
+@@ -1,6 +1,6 @@
+ ACLOCAL_AMFLAGS = -I build-scripts
+ 
+-SUBDIRS = . libtwolame frontend simplefrontend doc tests
++SUBDIRS = . libtwolame
+ 
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = twolame.pc

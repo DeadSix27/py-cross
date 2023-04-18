@@ -1,0 +1,42 @@
+From 77cf861fc7894c390195595f2519c0f530674b25 Mon Sep 17 00:00:00 2001
+From: DeadSix27 <DeadSix27@users.noreply.github.com>
+Date: Mon, 17 Apr 2023 12:49:28 +0200
+Subject: [PATCH] meson: add an option to disable utilities building
+
+---
+ meson.build       | 5 ++++-
+ meson_options.txt | 2 ++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 6bf8d05da..4f5cc8c7a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -373,7 +373,10 @@ foreach check : check_funcs
+ endforeach
+ 
+ subdir('src')
+-subdir('util')
++
++if not get_option('utilities').disabled()
++  subdir('util')
++endif
+ 
+ if not get_option('tests').disabled()
+   subdir('test')
+diff --git a/meson_options.txt b/meson_options.txt
+index 195d556e8..bc8bc2609 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -31,6 +31,8 @@ option('docs', type: 'feature', value: 'auto', yield: true,
+   description: 'Generate documentation with gtk-doc')
+ option('doc_tests', type: 'boolean', value: false,
+   description: 'Run gtkdoc-check tests')
++option('utilities', type: 'feature', value: 'enabled', yield: true,
++  description: 'Build utilities')
+ 
+ option('benchmark', type: 'feature', value: 'disabled',
+   description: 'Enable benchmark tests')
+-- 
+2.39.2.windows.1
+

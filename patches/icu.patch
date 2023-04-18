@@ -1,0 +1,18 @@
++++ icu4c_local/icu4c/source/common/unicode/umachine.h	2023-04-12 13:36:26.796831634 +0200
+--- icu4c/icu4c/source/common/unicode/umachine.h	2023-04-12 13:46:50.715499709 +0200
+@@ -77,11 +77,11 @@
+  */
+ 
+ #ifdef __cplusplus
+-#   define U_CFUNC extern "C"
+-#   define U_CDECL_BEGIN extern "C" {
+-#   define U_CDECL_END   }
++#   define U_CFUNC  extern "C"
++#   define U_CDECL_BEGIN extern "C" {
++#   define U_CDECL_END }
+ #else
+-#   define U_CFUNC extern
++#   define U_CFUNC
+ #   define U_CDECL_BEGIN
+ #   define U_CDECL_END
+ #endif

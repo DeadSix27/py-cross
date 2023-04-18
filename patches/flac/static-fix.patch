@@ -1,0 +1,24 @@
+diff '--color=auto' -Nur libflac/include/FLAC/export.h libflac2/include/FLAC/export.h
+--- libflac/include/FLAC/export.h	2023-04-16 23:14:17.850980772 +0200
++++ libflac2/include/FLAC/export.h	2023-04-16 23:14:26.033199751 +0200
+@@ -72,7 +72,7 @@
+  * build static, shared or **both**. Therefore, DLL_EXPORT, which is set
+  * by libtool, must override FLAC__NO_DLL on building shared components
+  */
+-#if defined(_WIN32)
++#if defined(_MSC_VER)
+ 
+ #if defined(FLAC__NO_DLL) && !(defined(DLL_EXPORT))
+ #define FLAC_API
+diff '--color=auto' -Nur libflac/include/FLAC++/export.h libflac2/include/FLAC++/export.h
+--- libflac/include/FLAC++/export.h	2023-04-16 23:14:15.211341273 +0200
++++ libflac2/include/FLAC++/export.h	2023-04-16 23:14:28.808181409 +0200
+@@ -72,7 +72,7 @@
+  * build static, shared or **both**. Therefore, DLL_EXPORT, which is set
+  * by libtool, must override FLAC__NO_DLL on building shared components
+  */
+-#if defined(_WIN32)
++#if defined(_MSC_VER)
+ #if defined(FLAC__NO_DLL) && !(defined(DLL_EXPORT))
+ #define FLACPP_API
+ #else

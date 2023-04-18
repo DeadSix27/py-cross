@@ -1,0 +1,45 @@
+diff '--color=auto' -Nur zvbi/Makefile.am zvbi.patch/Makefile.am
+--- zvbi/Makefile.am	2008-02-19 01:42:26.000000000 +0100
++++ zvbi.patch/Makefile.am	2023-04-16 17:58:57.248165388 +0200
+@@ -19,13 +19,7 @@
+ # Attn order matters.
+ SUBDIRS = \
+ 	m4 \
+-	src \
+-	$(proxy_dirs) \
+-	contrib \
+-	examples \
+-	test \
+-	po \
+-	doc
++	src
+ 
+ ACLOCAL_AMFLAGS = -I m4
+ 
+diff '--color=auto' -Nur zvbi/Makefile.in zvbi.patch/Makefile.in
+--- zvbi/Makefile.in	2013-08-28 16:24:12.000000000 +0200
++++ zvbi.patch/Makefile.in	2023-04-16 17:58:41.429754790 +0200
+@@ -78,7 +78,7 @@
+ DATA = $(pkgconfig_DATA)
+ ETAGS = etags
+ CTAGS = ctags
+-DIST_SUBDIRS = m4 src daemon contrib examples test po doc
++DIST_SUBDIRS = m4 src
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ distdir = $(PACKAGE)-$(VERSION)
+ top_distdir = $(distdir)
+@@ -265,13 +265,7 @@
+ # Attn order matters.
+ SUBDIRS = \
+ 	m4 \
+-	src \
+-	$(proxy_dirs) \
+-	contrib \
+-	examples \
+-	test \
+-	po \
+-	doc
++	src
+ 
+ ACLOCAL_AMFLAGS = -I m4
+ pkgconfigdir = $(libdir)/pkgconfig
