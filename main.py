@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+from ast import Str
 import datetime
 import hashlib
 import importlib
@@ -185,7 +186,7 @@ class CrossCompiler:
 
         self.parseCommandLine()
 
-        self.buildPackages(self.packages["mpv"])
+        self.buildPackageAndDeps(self.packages["mpv"])
 
 
     def parseCommandLine(self):
@@ -193,7 +194,7 @@ class CrossCompiler:
 
         parser.add_argument(
             "packages",
-            nargs="?",
+            nargs="+",
             help="Single package or list of package to build",
         )
 
@@ -219,6 +220,7 @@ class CrossCompiler:
                     f"The package(s): {'; '.join([f'<u>{s}</u>' for s in non_existing])}, do not exist."
                 )
                 exit(1)
+            self.buildBackageList(args.packages)
 
             exit()
 
@@ -262,8 +264,12 @@ class CrossCompiler:
             )
 
         return ":".join(str(x) for x in possiblePaths)
+    
+    def buildBackageList(self, pkgLst: List[Str]):
+        for pkgName in pkgLst:
+            self.buildPackageAndDeps(self.packages[pkgName])
 
-    def buildPackages(self, pkg):
+    def buildPackageAndDeps(self, pkg):
         self.logger.info(f"Building {pkg.name}")
         if pkg.name in self.packagesBuilt:
             if self.packagesBuilt[pkg.name]:
@@ -281,7 +287,7 @@ class CrossCompiler:
                         f"{pkg_name} is not an available package, requested by: {pkg.name}"
                     )
                 dependency_pkg = self.packages[pkg_name]
-                self.buildPackages(dependency_pkg)
+                self.buildPackageAndDeps(dependency_pkg)
 
         try:
             self.buildPackage(pkg)
@@ -347,6 +353,7 @@ class CrossCompiler:
         return pkgPath
 
     def handleRegexReplace(self, rp, packageName):
+        multiline = False
         cwd = Path(os.getcwd())
         if "in_file" not in rp:
             self.logger.error(
@@ -370,6 +377,9 @@ class CrossCompiler:
         ]
         if 1 in rp:
             repls.append(self.format_variable_str(rp[1]))
+
+        if "multiline" in rp:
+            multiline = True
 
         self.logger.info(
             f"Running regex replace commands on package: '{packageName}' [{os.getcwd()}]"
@@ -406,19 +416,30 @@ class CrossCompiler:
                     _current_infile = _tmp_file
                 self.logger.info(f"[{packageName}] Running regex command on '{_current_outfile}'")
 
-                with open(_current_infile, "r") as f:
-                    with open(_current_outfile, "w") as nf:
-                        for line in f:
-                            if re.search(repls[0], line) and len(repls) > 1:
-                                self.logger.info(f"RegEx replacing line")
-                                self.logger.info(f"in {_current_outfile}\n{line}\nwith:")
-                                line = re.sub(repls[0], repls[1], line)
-                                self.logger.info(f"\n{line}")
-                                nf.write(line)
-                            elif re.search(repls[0], line):
-                                self.logger.info(f"RegEx removing line\n{line}:")
-                            else:
-                                nf.write(line)
+                if multiline:
+                    with open(_current_infile, "r") as f:
+                        with open(_current_outfile, "w") as nf:
+                            replaceWith = ""
+                            if len(repls) >= 2:
+                                replaceWith = repls[1]
+                            newFile = re.sub(repls[0], replaceWith, f.read(), flags=re.MULTILINE)
+                            nf.write(newFile)
+                else:
+                    with open(_current_infile, "r") as f:
+                        with open(_current_outfile, "w") as nf:
+                            for line in f:
+                                if re.search(repls[0], line) and len(repls) > 1:
+                                    self.logger.info(f"RegEx replacing line")
+                                    self.logger.info(f"in {_current_outfile}\n{line}\nwith:")
+                                    line = re.sub(repls[0], repls[1], line)
+                                    self.logger.info(f"\n{line}")
+                                    nf.write(line)
+                                elif re.search(repls[0], line):
+                                    self.logger.info(f"RegEx removing line\n{line}:")
+                                else:
+                                    nf.write(line)
+                _current_infile.unlink()
+                _backup.unlink()
 
     def runProcess(self, args, ignore_errors=False, exit_on_error=True, inputFile=None) -> int:
         if not isinstance(args, tuple) and not isinstance(args, list):
@@ -1488,7 +1509,7 @@ class CrossCompiler:
         toolchainBuilder.onStatusUpdate += toolchainBuildStatus
         toolchainBuilder.build()
 
-        self.buildPackages(self.packages["pkg-config"])
+        self.buildPackageAndDeps(self.packages["pkg-config"])
 
 
 if __name__ == "__main__":
