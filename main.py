@@ -178,10 +178,10 @@ class CrossCompiler:
         self.loadPackages()
         self.sanityCheckPackages()
 
+        self.createCargoHome() # we build this first so we do not have to worry about the enviroment being correct.
         self.buildMinGWToolchain()
         self.createCmakeToolchainFile()
         self.createMesonEnvFile()
-        self.createCargoHome()
         self.setDefaultEnv()
 
         self.parseCommandLine()
@@ -305,9 +305,9 @@ class CrossCompiler:
         os.environ["PKG_CONFIG_PATH"] = str(self.pkgConfigPath)
         os.environ["COLOR"] = "ON"  # Force coloring on (for CMake primarily)
         os.environ["CLICOLOR_FORCE"] = "ON"  # Force coloring on (for CMake primarily)
-        os.environ[
-            "CFLAGS"
-        ] = "-Ofast -march=znver3 -mtune=znver3"  # Force coloring on (for CMake primarily)
+        # os.environ[
+            # "CFLAGS"
+        # ] = "-Ofast -march=znver3 -mtune=znver3"  # Force coloring on (for CMake primarily)
         # os.environ["CMAKE_SYSTEM_IGNORE_PATH"] = "/;/usr;/usr/local"
 
         # os.environ["MESON_CMAKE_TOOLCHAIN_FILE"] = str(self.cmakeToolchainFile)
@@ -527,26 +527,29 @@ class CrossCompiler:
 
     def gitClone(self, package: BasePackage):
         cloneUrl = package.url
+        originalPath = os.getcwd()
         if package.path.exists():
-            _olddir = os.getcwd()
             os.chdir(package.path)
             if self.gitHasNewCommits():
                 self.runProcess(("git", "pull"))
-                os.chdir(_olddir)
+                os.chdir(originalPath)
                 return True
             else:
                 self.logger.info(f"Git repo for {package.name} is up to date")
-            os.chdir(_olddir)
+            os.chdir(originalPath)
             return False
 
         cloneCmd = ["git", "clone", "--progress", "-v"]
-        if package.git_depth:
+        if package.git_depth and not package.git_tag:
             cloneCmd.append(f"--depth={package.git_depth}")
         if package.git_recursive:
             cloneCmd.append("--recursive")
         if package.git_shallow_submodules:
             cloneCmd.append("--shallow-submodules")
         if package.git_branch:
+            if package.git_tag:
+                self.logger.error("You can <b>not</b> use git tag and branch at the <u>same time</u>.")
+                exit(1)
             cloneCmd.append(f"--branch={package.git_branch}")
 
         cloneCmd.append(cloneUrl)
@@ -554,6 +557,12 @@ class CrossCompiler:
 
         self.logger.info(f"Cloning {package.name} with '{shlex.join(cloneCmd)}'")
         self.runProcess(cloneCmd)
+
+        if package.git_tag:
+            package.path.pushd()
+            self.logger.info(f"Checking out tag [{package.git_tag}] for {package.name}")
+            self.runProcess(["git", "checkout", package.git_tag])
+            package.path.popd()
         return True
 
     def hgHasNewCommits(self):
@@ -1380,7 +1389,7 @@ class CrossCompiler:
 
             cargoConfigPath = self.cargoHomePath.joinpath("config.toml")
 
-            self.cargoHomePath.mkdir(parents=True)
+            self.cargoHomePath.mkdir(parents=True, exist_ok=True)
             tcFile = [
                 f"[target.{self.rustTargetStr}]",
                 f'linker = "{self.mingwPrefixStrDash}gcc"',

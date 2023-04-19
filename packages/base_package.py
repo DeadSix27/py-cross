@@ -25,6 +25,7 @@ class BasePackage:
     git_shallow_submodules = True
     git_depth = 1
     git_branch = None
+    git_tag = None
     autogen_only_reconf = False
     autogen = True
     runAutogenInSubSource = False
