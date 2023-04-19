@@ -21,6 +21,7 @@ class Path(pathlib.Path):
 
 	def __init__(self, *args):
 		super().__init__()
+		self.stack: List[Path] = []
 		self.ssuffix = self.suffix.lstrip(".")
 		self._some_instance_ppath_value = self.exists()
 
@@ -231,6 +232,20 @@ class Path(pathlib.Path):
 
 	def joinpath(self, *other):
 		return Path(super().joinpath(*other))
+	
+	def chdir(self):
+		os.chdir(self)
+
+	def pushd(self):
+		self.stack.append(self)
+		self.chdir()
+
+	def popd(self):
+		if len(self.stack) == 0:
+			return os.getcwd()
+		directory = self.stack.pop()
+		directory.chdir()
+		return directory
 
 	@property
 	def parent(self):
@@ -241,6 +256,3 @@ class Path(pathlib.Path):
 		if len(parts) == 1 and (drv or root):
 			return self
 		return self._from_parsed_parts(drv, root, parts[:-1])
-
-
-# #
