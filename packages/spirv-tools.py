@@ -12,6 +12,7 @@ class SPIRV_Tools(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
+        self.git_tag = "d5f69dba559822c2c968a959238ab037b5556af6"
         self.patches = [
             {"file": "https://github.com/DeadSix27/SPIRV-Tools/commit/6ef89a00fbccb833f6ba3c86c169845019ef36b0.patch"},
         ]
