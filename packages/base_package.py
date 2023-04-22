@@ -20,7 +20,7 @@ class BasePackage:
     autoconf_command: list[str] = ["./configure"]
     cargo_command = ["cargo"]
     meson_command = ["meson", "setup"]
-    ninja_command = ["ninja"]
+    ninja_command = ["ninja","-v"]
     git_recursive = True
     git_shallow_submodules = True
     git_depth = 1
@@ -125,13 +125,22 @@ class BasePackage:
     def pkg_post_regex_replace_cmd(self):
         pass
 
+
+    @property
+    def cflags(self):
+        return self.pkg_cflags
+    
+    @property
+    def pkg_cflags(self):
+        return []
+
     @property
     def depends(self):
         return self.pkg_depends
     
     @property
     def pkg_depends(self):
-        return ()
+        return []
     
     @property
     def has_patches(self):
@@ -143,7 +152,7 @@ class BasePackage:
 
     @property
     def pkg_mirrors(self):
-        return ()
+        return []
 
     @property
     def path(self):
@@ -171,7 +180,7 @@ class BasePackage:
         # return self.compiler.format_variable_list(self.pkg_build)
     @property
     def pkg_build(self):
-        return ()
+        return []
     @property
     def pkg_config(self) -> list[str]:
         return []
@@ -181,7 +190,7 @@ class BasePackage:
     
     @property
     def pkg_install(self):
-        return ()
+        return []
     @property
     def install(self):
         return self.compiler.format_variable_list(self.pkg_install)

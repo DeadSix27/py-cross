@@ -269,7 +269,7 @@ class CrossCompiler:
         for pkgName in pkgLst:
             self.buildPackageAndDeps(self.packages[pkgName])
 
-    def buildPackageAndDeps(self, pkg):
+    def buildPackageAndDeps(self, pkg: BasePackage):
         self.logger.info(f"Building {pkg.name}")
         if pkg.name in self.packagesBuilt:
             if self.packagesBuilt[pkg.name]:
@@ -305,9 +305,6 @@ class CrossCompiler:
         os.environ["PKG_CONFIG_PATH"] = str(self.pkgConfigPath)
         os.environ["COLOR"] = "ON"  # Force coloring on (for CMake primarily)
         os.environ["CLICOLOR_FORCE"] = "ON"  # Force coloring on (for CMake primarily)
-        # os.environ[
-            # "CFLAGS"
-        # ] = "-Ofast -march=znver3 -mtune=znver3"  # Force coloring on (for CMake primarily)
         # os.environ["CMAKE_SYSTEM_IGNORE_PATH"] = "/;/usr;/usr/local"
 
         # os.environ["MESON_CMAKE_TOOLCHAIN_FILE"] = str(self.cmakeToolchainFile)
@@ -690,6 +687,8 @@ class CrossCompiler:
             hashes = mirror["hashes"]
             for h in hashes:  # type:ignore
                 self.logger.info("Comparing hashes..")
+                if h["sum"] == "SKIP":
+                    return (False, f)
                 hashReturn = self.verifyHash(f, h)
                 if hashReturn[0] is True:
                     self.logger.info(
@@ -1019,6 +1018,9 @@ class CrossCompiler:
                 envVarFormatted = self.format_variable_str(package.env[envVar])
                 self.logger.info(f"Setting env var {envVar} to {envVarFormatted}")
                 os.environ[envVar] = envVarFormatted
+        if len(package.cflags):
+            self.logger.info(f"Setting CFLAGS to {package.cflags}")
+            os.environ["CFLAGS"] = " ".join(package.cflags)
 
         if not package.path.joinpath("_already_conf").exists():
             if package.conf_system == BasePackage.ConfSystem.CMake:
