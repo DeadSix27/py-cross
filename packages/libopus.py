@@ -15,6 +15,10 @@ class LIBOPUS(BasePackage):
         self.source_subfolder = "_build"
 
     @property
+    def pkg_cflags(self):
+        return ["-O3"]
+
+    @property
     def pkg_depends(self):
         return ()
 
