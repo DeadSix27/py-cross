@@ -240,6 +240,15 @@ class Path(pathlib.Path):
 		self.stack.append(self)
 		self.chdir()
 
+	def createDate(self):
+		return self.stat().st_ctime
+
+	def modifyDate(self):
+		return self.stat().st_mtime
+
+	def size(self):
+		return self.stat().st_size
+
 	def popd(self):
 		if len(self.stack) == 0:
 			return os.getcwd()
