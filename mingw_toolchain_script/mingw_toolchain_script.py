@@ -124,7 +124,7 @@ SOURCES["binutils"] = {
 }
 SOURCES["gcc"] = {
     "type": "archive",
-    "version": "13-20230409",
+    "version": "13.1.0-RC-20230421",
     "url": "https://gcc.gnu.org/pub/gcc/snapshots/{version}/gcc-{version}.tar.xz",
     # 'patches': [
     # ( 'https://raw.githubusercontent.com/DeadSix27/python_cross_compile_script/master/mingw_toolchain_script/patches/0001-gcc_7_1_0_weak_refs_x86_64.patch', 'p1' ),
@@ -174,9 +174,9 @@ BUILDS["mingw-w64-headers"] = {
     ' --prefix="{prefix}"'
     " --enable-sdk=all"
     # ' --enable-secure-api'
-    " --enable-idl" " --with-default-msvcrt=msvcrt"
-    # ' --with-default-win32-winnt=0x600'	,
-    ,
+    " --enable-idl"
+    " --with-default-msvcrt=msvcrt"
+    " --with-default-win32-winnt=0xA00", #win10
     "softLinks": [
         ("{prefix}", "./{target}", "./mingw"),
         ("{prefix}/{target}", "../include", "./include"),
@@ -203,6 +203,7 @@ BUILDS["gcc-1"] = {
     " --enable-lto"
     " --enable-checking=release"
     " --enable-seh-exceptions"
+    "--disable-sjlj-exceptions"
     # ' --enable-libada'
     # ' --enable-libssp'
     # ' --enable-gold'
@@ -309,9 +310,7 @@ class Event:
         try:
             self.handlers.remove(handler)
         except:
-            raise ValueError(
-                "Handler is not handling this event, so cannot unhandle it."
-            )
+            raise ValueError("Handler is not handling this event, so cannot unhandle it.")
         return self
 
     def fire(self, *args, **kargs):
@@ -329,20 +328,16 @@ class Event:
 
 class MinGW64ToolChainBuilder:
     def __init__(self):
-        sys.dont_write_bytecode = (
-            True  # Avoid __pycache__ folder, never liked that solution.
-        )
+        sys.dont_write_bytecode = True
         self.pathOrig = os.environ["PATH"]
         self.workDir = _WORKDIR
         self.nativeHost = ""
         self.cwd = os.getcwd()
         self.baseFolder = os.path.join(os.getcwd(), "work")
         self.debugBuild = False
-        self.customCflags = None
+        self.customCflags = "-O3"  # default to O3
         self.targetHost = "x86_64-w64-mingw32"
-        self.targetPrefix = os.path.join(
-            self.baseFolder, self.workDir, self.targetHost
-        )
+        self.targetPrefix = os.path.join(self.baseFolder, self.workDir, self.targetHost)
         self.targetPrefixBin = os.path.join(self.targetPrefix, "bin")
         self.quietMode = False
         self.sourceDir = os.path.join(self.baseFolder, self.workDir, "src")
@@ -397,9 +392,7 @@ class MinGW64ToolChainBuilder:
             " ",
             progressbar.Percentage(),
             " ",
-            progressbar.Bar(
-                fill=chr(9617), marker=chr(9608), left="[", right="]"
-            ),
+            progressbar.Bar(fill=chr(9617), marker=chr(9608), left="[", right="]"),
             " ",
             progressbar.DataSize(),
             "/",
@@ -407,16 +400,10 @@ class MinGW64ToolChainBuilder:
             # " "*filler,
         ]
 
-        pbar = progressbar.ProgressBar(
-            widgets=widgets, maxval=os.path.getsize(filename)
-        )
+        pbar = progressbar.ProgressBar(widgets=widgets, maxval=os.path.getsize(filename))
         pbar.start()
-        tarfile.TarFile.fileobject = get_file_progress_file_object_class(
-            on_progress, pbar
-        )
-        tar = tarfile.open(
-            fileobj=ProgressFileObject(filename, pbar), mode="r:*"
-        )
+        tarfile.TarFile.fileobject = get_file_progress_file_object_class(on_progress, pbar)
+        tar = tarfile.open(fileobj=ProgressFileObject(filename, pbar), mode="r:*")
         outputPath = os.path.commonprefix(tar.getnames())
         if os.path.isfile(outputPath):
             return outputPath
@@ -430,9 +417,7 @@ class MinGW64ToolChainBuilder:
 
     #:
 
-    def download_file(
-        self, url=None, outputFileName=None, outputPath=None, bytes=False
-    ):
+    def download_file(self, url=None, outputFileName=None, outputPath=None, bytes=False):
         def fmt_size(num, suffix="B"):
             for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
                 if abs(num) < 1024.0:
@@ -448,9 +433,7 @@ class MinGW64ToolChainBuilder:
             outputPath = os.getcwd()
         else:
             if not os.path.isdir(outputPath):
-                raise Exception(
-                    'Specified path "{0}" does not exist'.format(outputPath)
-                )
+                raise Exception('Specified path "{0}" does not exist'.format(outputPath))
 
         fileName = os.path.basename(url)  # Get URL filename
         userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0"
@@ -472,9 +455,7 @@ class MinGW64ToolChainBuilder:
             req.raise_for_status()
 
         if "content-disposition" in req.headers:
-            reSponse = re.findall(
-                "filename=(.+)", req.headers["content-disposition"]
-            )
+            reSponse = re.findall("filename=(.+)", req.headers["content-disposition"])
             if reSponse == None:
                 fileName = os.path.basename(url)
             else:
@@ -489,11 +470,7 @@ class MinGW64ToolChainBuilder:
             if req.headers["Content-Encoding"] == "gzip":
                 compressed = True
 
-        self.log(
-            "Requesting : {0} - {1}".format(
-                url, fmt_size(size) if size != None else "?"
-            )
-        )
+        self.log("Requesting : {0} - {1}".format(url, fmt_size(size) if size != None else "?"))
 
         # terms = shutil.get_terminal_size((100,100))
         # filler = 0
@@ -517,9 +494,7 @@ class MinGW64ToolChainBuilder:
             " ",
             progressbar.Percentage(),
             " ",
-            progressbar.Bar(
-                fill=chr(9617), marker=chr(9608), left="[", right="]"
-            ),
+            progressbar.Bar(fill=chr(9617), marker=chr(9608), left="[", right="]"),
             " ",
             progressbar.DataSize(),
             "/",
@@ -532,9 +507,7 @@ class MinGW64ToolChainBuilder:
         ]
         pbar = None
         if size == None:
-            pbar = progressbar.ProgressBar(
-                widgets=widgetsNoSize, maxval=progressbar.UnknownLength
-            )
+            pbar = progressbar.ProgressBar(widgets=widgetsNoSize, maxval=progressbar.UnknownLength)
         else:
             pbar = progressbar.ProgressBar(widgets=widgets, maxval=size)
 
@@ -664,9 +637,7 @@ class MinGW64ToolChainBuilder:
             properBranchString = desiredBranch
 
         if os.path.isdir(realFolderName):
-            self.log(
-                "Git repo '%s' already cloned, updating.." % (packageName, url)
-            )
+            self.log("Git repo '%s' already cloned, updating.." % (packageName, url))
             self.cchdir(realFolderName)
 
             self.run_process("git remote update")
@@ -676,9 +647,7 @@ class MinGW64ToolChainBuilder:
             if desiredBranch != None:
                 UPSTREAM = properBranchString
 
-            LOCAL = subprocess.check_output(
-                "git rev-parse @", shell=True
-            ).decode("utf-8")
+            LOCAL = subprocess.check_output("git rev-parse @", shell=True).decode("utf-8")
             REMOTE = subprocess.check_output(
                 'git rev-parse "{0}"'.format(UPSTREAM), shell=True
             ).decode("utf-8")
@@ -695,21 +664,15 @@ class MinGW64ToolChainBuilder:
                     # if len(bsSplit) == 2:
                     # 	self.run_process('git pull origin {1}'.format(bsSplit[0],bsSplit[1]))
                     # else:
-                    self.run_process(
-                        "git pull origin {0}".format(properBranchString)
-                    )
+                    self.run_process("git pull origin {0}".format(properBranchString))
                 else:
                     self.run_process("git pull".format(properBranchString))
                 self.run_process(
                     "git clean -xfdf"
                 )  # https://gist.github.com/nicktoumpelis/11214362
-                self.run_process(
-                    "git submodule foreach --recursive git clean -xfdf"
-                )
+                self.run_process("git submodule foreach --recursive git clean -xfdf")
                 self.run_process("git reset --hard")
-                self.run_process(
-                    "git submodule foreach --recursive git reset --hard"
-                )
+                self.run_process("git submodule foreach --recursive git reset --hard")
                 self.run_process("git submodule update --init --recursive")
             self.cchdir("..")
         else:
@@ -727,14 +690,10 @@ class MinGW64ToolChainBuilder:
             if desiredBranch != None:
                 self.cchdir(realFolderName + ".tmp")
                 self.run_process(
-                    "git checkout{0}".format(
-                        " master" if desiredBranch == None else branchString
-                    )
+                    "git checkout{0}".format(" master" if desiredBranch == None else branchString)
                 )
                 self.cchdir("..")
-            self.run_process(
-                'mv "{0}" "{1}"'.format(realFolderName + ".tmp", realFolderName)
-            )
+            self.run_process('mv "{0}" "{1}"'.format(realFolderName + ".tmp", realFolderName))
 
         return realFolderName
 
@@ -742,11 +701,7 @@ class MinGW64ToolChainBuilder:
 
     def getConfigGuess(self):
         if _NO_CONFIG_GUESS == True:
-            return (
-                subprocess.check_output("gcc -dumpmachine", shell=True)
-                .decode("utf-8")
-                .strip()
-            )
+            return subprocess.check_output("gcc -dumpmachine", shell=True).decode("utf-8").strip()
         else:
             return (
                 subprocess.check_output(
@@ -826,9 +781,7 @@ class MinGW64ToolChainBuilder:
                     pUrl = p["url"].format(version=p["version"])
                     fileName = os.path.basename(pUrl)
                     folderName = self.splitext(fileName)[0]
-                    if not os.path.isfile(fileName) and not os.path.isdir(
-                        folderName
-                    ):
+                    if not os.path.isfile(fileName) and not os.path.isdir(folderName):
                         self.log("Downloading sources for: %s" % pn)
                         self.download_file(pUrl)
                         self.log("Extracting sources for: %s" % pn)
@@ -844,9 +797,7 @@ class MinGW64ToolChainBuilder:
 
                 for patchTuple in p["patches"]:
                     patchBn = os.path.basename(patchTuple[0])
-                    self.log(
-                        "Patching " + str(pn) + " with: " + str(patchTuple[0])
-                    )
+                    self.log("Patching " + str(pn) + " with: " + str(patchTuple[0]))
                     if not os.path.isfile(os.path.basename(patchTuple[0])):
                         result = self.applyPatch(patchTuple[0], patchTuple[1])
                         if _DEBUG:
@@ -888,29 +839,17 @@ class MinGW64ToolChainBuilder:
                             )
                             exit()
                 self.cchdir(baseDir)
-            SOURCES[pn]["sourceFolder"] = os.path.join(
-                self.sourceDir, productPath
-            )
-            SOURCES[pn]["buildFolder"] = os.path.join(
-                self.buildDir, productPath
-            )
+            SOURCES[pn]["sourceFolder"] = os.path.join(self.sourceDir, productPath)
+            SOURCES[pn]["buildFolder"] = os.path.join(self.buildDir, productPath)
             if "builds" in p:
                 for b in p["builds"]:
                     if b in BUILDS:
-                        BUILDS[b]["sourceFolder"] = os.path.join(
-                            self.sourceDir, productPath
-                        )
-                        BUILDS[b]["buildFolder"] = os.path.join(
-                            self.buildDir, productPath
-                        )
+                        BUILDS[b]["sourceFolder"] = os.path.join(self.sourceDir, productPath)
+                        BUILDS[b]["buildFolder"] = os.path.join(self.buildDir, productPath)
             else:
                 if pn in BUILDS:
-                    BUILDS[pn]["sourceFolder"] = os.path.join(
-                        self.sourceDir, productPath
-                    )
-                    BUILDS[pn]["buildFolder"] = os.path.join(
-                        self.buildDir, productPath
-                    )
+                    BUILDS[pn]["sourceFolder"] = os.path.join(self.sourceDir, productPath)
+                    BUILDS[pn]["buildFolder"] = os.path.join(self.buildDir, productPath)
 
         self.cchdir(origDir)
 
@@ -947,9 +886,7 @@ class MinGW64ToolChainBuilder:
                 gmp_path=self.getSafePath(BUILDS, "gmp"),
             )
 
-        os.environ["PATH"] = "{0}:{1}".format(
-            self.targetPrefixBin, self.pathOrig
-        )
+        os.environ["PATH"] = "{0}:{1}".format(self.targetPrefixBin, self.pathOrig)
 
         origDir = os.getcwd()
         self.cchdir(self.sourceDir)
@@ -982,9 +919,7 @@ class MinGW64ToolChainBuilder:
 
             if self.customCflags != None:
                 if _DEBUG:
-                    self.log(
-                        "Setting custom C(XX)FLAGS to: " + self.customCflags
-                    )
+                    self.log("Setting custom C(XX)FLAGS to: " + self.customCflags)
                 os.environ["CFLAGS"] = self.customCflags
                 os.environ["CXXFLAGS"] = self.customCflags
                 # os.environ["CPPFLAGS"] = "-O3"
@@ -1043,9 +978,7 @@ class MinGW64ToolChainBuilder:
                     if p["noInstall"] == True:
                         noInstall = True
                 if not noInstall:
-                    isntOpt = self.dictGetSafeString(
-                        p, "lineInstall", "install"
-                    )
+                    isntOpt = self.dictGetSafeString(p, "lineInstall", "install")
                     if self.debugBuild:
                         if "lineInstall" not in p:
                             self.log(
@@ -1117,18 +1050,14 @@ class MinGW64ToolChainBuilder:
 
     def setDebugBuild(self, switch):
         self.debugBuild = switch
-        self.log(
-            "MinGW debug build: " + ("On" if self.debugBuild == True else "Off")
-        )
+        self.log("MinGW debug build: " + ("On" if self.debugBuild == True else "Off"))
 
     #:
 
     def build(self):
         self.nativeHost = self.getConfigGuess()
         self.createWorkDirs()
-        self.logFile = open(
-            os.path.join(self.cwd, self.workDir, "build.log"), "w"
-        )
+        self.logFile = open(os.path.join(self.cwd, self.workDir, "build.log"), "w")
         self.downloadSources()
         self.buildSources()
 
