@@ -15,17 +15,17 @@ class VULKAN_LOADER(BasePackage):
 
         self.regex_replace = {
             'post_install': [
-                {
-                    0: r'(?:[^\r\n]+)?libdir=(?:[^\r\n]+)?',
-                    'in_file': '{pkg_config_path}/vulkan.pc',
-                    # 'out_file': '{pkg_config_path}/vulkan.pc'
-                },
-                {
-                    0: r'exec_prefix=([^\r\n]+)',
-                    1: r'exec_prefix=\1\nlibdir=${{exec_prefix}}/lib\n',
-                    'in_file': '{pkg_config_path}/vulkan.pc',
-                    # 'out_file': '{pkg_config_path}/vulkan.pc'
-                },
+                # {
+                #     0: r'(?:[^\r\n]+)?libdir=(?:[^\r\n]+)?',
+                #     'in_file': '{pkg_config_path}/vulkan.pc',
+                #     # 'out_file': '{pkg_config_path}/vulkan.pc'
+                # },
+                # {
+                #     0: r'exec_prefix=([^\r\n]+)',
+                #     1: r'exec_prefix=\1\nlibdir=${{exec_prefix}}/lib\n',
+                #     'in_file': '{pkg_config_path}/vulkan.pc',
+                #     # 'out_file': '{pkg_config_path}/vulkan.pc'
+                # },
                 {
                     0: r'-lvulkan-1.dll$',
                     1: r'-l:libvulkan-1.dll.a',
