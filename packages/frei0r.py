@@ -45,7 +45,6 @@ class Frei0rPackage(BasePackage):
     def pkg_config(self):
         return (
             "..",
-            "--debug-find",
             "{cmake_prefix_options}",
             "-DCMAKE_INSTALL_PREFIX={target_prefix}",
             "-DWITHOUT_OPENCV=YES",

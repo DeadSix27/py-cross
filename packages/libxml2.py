@@ -36,7 +36,6 @@ class LIBXML2(BasePackage): #todo, important: fix pkg config file, cuu needs ++ 
     def pkg_config(self):
         return (
             '..',
-            # '--debug-find',
             '{cmake_prefix_options}',
             '-DCMAKE_INSTALL_PREFIX={target_prefix}',
             '-DBUILD_SHARED_LIBS=OFF',
