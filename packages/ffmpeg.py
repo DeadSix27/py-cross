@@ -70,6 +70,7 @@ class FFMPEG(BasePackage):
             "libcdio-paranoia",
             "nv-codec-headers",
             "amf",
+            "sdl2",
         )
     @property
     def pkg_env(self):
