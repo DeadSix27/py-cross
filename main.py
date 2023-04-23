@@ -141,6 +141,7 @@ class CrossCompiler:
             "target_prefix": str(self.crossPrefix),
             "target_prefix_sed_escaped": str(self.crossPrefix).replace("/", "\\/"),
             "toolchain_bin_path_one": str(self.toolchainBinPathOne),
+            "toolchain_bin_path_two": str(self.toolchainBinPathTwo),
             "mingw_prefix": str(self.mingwPrefixStr),
             "mingw_prefix_dash": str(self.mingwPrefixStrDash),
             "cmake_prefix_options": (
