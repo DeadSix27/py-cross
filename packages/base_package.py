@@ -73,7 +73,7 @@ class BasePackage:
     
     def post_make_commands(self): #todo sanitze
         self.compiler.runProcessDebug = True
-        print("Running pkg_post_make_commands")
+        self.compiler.logger.info("Running pkg_post_make_commands")
         self.pkg_post_make_commands()
         self.compiler.runProcessDebug = False
 
@@ -81,7 +81,7 @@ class BasePackage:
         pass
     
     def post_build_commands(self): #todo sanitze
-        print("Running pkg_post_build_commands")
+        self.compiler.logger.info("Running pkg_post_build_commands")
         self.pkg_post_build_commands()
         self.compiler.runProcessDebug = False
 
@@ -91,7 +91,7 @@ class BasePackage:
     
     def post_install_commands(self): #todo sanitze
         self.compiler.runProcessDebug = True
-        print("Running pkg_post_install_commands")
+        self.compiler.logger.info("Running pkg_post_install_commands")
         self.pkg_post_install_commands()
         self.compiler.runProcessDebug = False
 
@@ -100,7 +100,7 @@ class BasePackage:
     
     def post_download_sub_commands(self): #todo sanitze
         self.compiler.runProcessDebug = True
-        print("Running pkg_post_download_sub_commands")
+        self.compiler.logger.info("Running pkg_post_download_sub_commands")
         self.pkg_post_download_sub_commands()
         self.compiler.runProcessDebug = False
 
@@ -109,7 +109,7 @@ class BasePackage:
     
     def post_download_commands(self): #todo sanitze
         self.compiler.runProcessDebug = True
-        print("Running pkg_post_download_commands")
+        self.compiler.logger.info("Running pkg_post_download_commands")
         self.pkg_post_download_commands()
         self.compiler.runProcessDebug = False
 
@@ -118,7 +118,7 @@ class BasePackage:
         
     def post_regex_replace_cmd(self): #todo sanitze
         self.compiler.runProcessDebug = True
-        print("Running pkg_post_regex_replace_cmd")
+        self.compiler.logger.info("Running pkg_post_regex_replace_cmd")
         self.pkg_post_regex_replace_cmd()
         self.compiler.runProcessDebug = False
 
