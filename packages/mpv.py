@@ -15,13 +15,9 @@ class mpv(BasePackage):
 
         self.patches = [
             {"file": "mpv/ádd-lib-prefix.patch"},
-            # ('https://github.com/mpv-player/mpv/pull/9975.patch', '-p1'),
-            # ( 'https://github.com/mpv-player/mpv/pull/11494.patch', '-p1'),
-            {
-                "file": "mpv/0001-change-icons.patch",
-                "cmd": "git apply ",
-            },
-            # ('https://github.com/mpv-player/mpv/pull/11495.patch', '-p1'),
+            # ( 'https://github.com/mpv-player/mpv/pull/11494.patch', '-p1'), # win32: add an option to change window affinity #11494 
+            {"file": "https://github.com/mpv-player/mpv/pull/11552.patch"}, #  win32: add window transparency option #11552
+            {"file": "mpv/0001-change-icons.patch", "cmd": "git apply ", },
         ]
 
         self.regex_replace = {
@@ -82,9 +78,15 @@ class mpv(BasePackage):
         ]
 
     def post_install_commands(self):
-        self.compiler.runProcess(["{mingw_prefix_dash}strip", "-v", "{install_path}/mpv/bin/mpv.com"])
-        self.compiler.runProcess(["{mingw_prefix_dash}strip", "-v", "{install_path}/mpv/bin/mpv.exe"])
-        self.compiler.runProcess(["{mingw_prefix_dash}strip", "-v", "{install_path}/mpv/bin/mpv-2.dll"])
+        self.compiler.runProcess(
+            ["{mingw_prefix_dash}strip", "-v", "{install_path}/mpv/bin/mpv.com"]
+        )
+        self.compiler.runProcess(
+            ["{mingw_prefix_dash}strip", "-v", "{install_path}/mpv/bin/mpv.exe"]
+        )
+        self.compiler.runProcess(
+            ["{mingw_prefix_dash}strip", "-v", "{install_path}/mpv/bin/mpv-2.dll"]
+        )
 
     @property
     def pkg_url(self):
@@ -99,7 +101,7 @@ class mpv(BasePackage):
             "--prefix={install_path}/mpv",
             "--default-library=both",
             "--backend=ninja",
-            "--buildtype=minsize",
+            "--buildtype=release",
             "-Dcdda=enabled",
             # '-Ddvbin=enabled ',
             "-Ddvdnav=enabled",
@@ -139,30 +141,3 @@ class mpv(BasePackage):
     @property
     def pkg_install(self):
         return ["install"]
-
-
-# {
-# 'repo_type' : 'git',
-# 'url' : '',
-# 'url' :'https://github.com/philipl/mpv.git',
-# 'branch': 'vulkan-interop',
-# 'conf_system' : 'meson',
-# 'depth_git': 0,
-# 'build_system' : 'ninja',
-# 'do_not_git_update': True,
-# 'source_subfolder' : 'build',
-# 'env_exports' : {
-# 	'DEST_OS' : 'win32',
-#     # 'CFLAGS'  : '-DHAVE_VK_EXT_DESCRIPTOR_BUFFER -DHAVE_VULKAN_INTEROP',
-# 	'TARGET'  : '{target_host}',
-# 	'PKG_CONFIG' : 'pkg-config',
-# 	'LDFLAGS': '-fstack-protector-strong',
-# },
-# 'depends_on' : [
-
-# ],
-# 'run_post_install' : (
-# 	'{cross_prefix_bare}strip -v {output_prefix}/mpv_git.installed/bin/mpv.com',
-# 	'{cross_prefix_bare}strip -v {output_prefix}/mpv_git.installed/bin/mpv.exe',
-# 	'{cross_prefix_bare}strip -v {output_prefix}/mpv_git.installed/bin/mpv-2.dll',
-# ),
