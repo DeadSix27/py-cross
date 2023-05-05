@@ -12,11 +12,8 @@ class openal(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
     
-        self.source_subfolder = "_build"
         self.git_tag = "471592b258d798bb706ce92c1ccd4d5794999490"
-        # self.patches = [
-        #     { "file": "openal/test.patch"}, 
-        # ]
+        self.source_subfolder = "_build"
         self.regex_replace = {
             "post_install": [
                 {
@@ -56,9 +53,6 @@ class openal(BasePackage):
             # '-DCMAKE_INSTALL_LIBDIR={target_prefix}/lib',
             # '-DCMAKE_FIND_ROOT_PATH=',
             '-DLIBTYPE=STATIC',
-            '-DALSOFT_STATIC_STDCXX=ON',
-            '-DALSOFT_STATIC_LIBGCC=ON',
-            '-DALSOFT_STATIC_WINPTHREAD=ON',
             '-DALSOFT_UTILS=OFF',
             '-DALSOFT_EXAMPLES=OFF',
             '-DALSOFT_STATIC_LIBGCC=ON',
