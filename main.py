@@ -1244,11 +1244,11 @@ class CrossCompiler:
             req.raise_for_status()
 
         if "content-disposition" in req.headers:
-            reSponse = re.findall("filename=(.+)", req.headers["content-disposition"])
-            if reSponse is None:
+            response = re.findall("filename=(.+)", req.headers["content-disposition"])
+            if response is None:
                 fileName = os.path.basename(url)
             else:
-                fileName = reSponse[0]
+                fileName = response[0]
 
         size = None
         compressed = False
