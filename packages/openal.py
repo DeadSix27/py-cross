@@ -12,7 +12,7 @@ class openal(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
     
-        self.git_tag = "471592b258d798bb706ce92c1ccd4d5794999490"
+        self.git_tag = "1.23.1"#"471592b258d798bb706ce92c1ccd4d5794999490"
         self.source_subfolder = "_build"
         self.regex_replace = {
             "post_install": [

@@ -12,10 +12,14 @@ class srt(BasePackage):
 		self.build_system = BasePackage.BuildSystem.Ninja
 		self.install_system = BasePackage.BuildSystem.Ninja
 		self.source_subfolder = "_build"
+		self.git_tag = "v1.5.1"
 
 	@property
 	def pkg_depends(self):
-		return ["libressl"]
+		return [
+			"openssl",
+			# "libressl"
+	    ]
 
 	@property
 	def pkg_url(self) -> str:

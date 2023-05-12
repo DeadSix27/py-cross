@@ -11,6 +11,7 @@ class RAV1E(BasePackage): #todo: fix stdc++
         self.conf_system = BasePackage.ConfSystem.Ignore
         self.build_system = BasePackage.BuildSystem.Cargo
         self.install_system = BasePackage.BuildSystem.Ignore
+        self.git_tag = "v0.6.4"
         # self.source_subfolder = "_build"
 
     @property
@@ -39,7 +40,7 @@ class RAV1E(BasePackage): #todo: fix stdc++
     def pkg_build(self):
         return (
             'cinstall',
-            '-v',
+            '-vv',
             '--prefix={target_prefix}',
             '--library-type=staticlib',
             '--crt-static',
