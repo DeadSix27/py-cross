@@ -19,7 +19,7 @@ class LIBPLACEBO(BasePackage):
     
     @property
     def pkg_url(self):
-        return "https://github.com/haasn/libplacebo"
+        return "https://code.videolan.org/videolan/libplacebo"
     
     @property
     def pkg_config(self):
