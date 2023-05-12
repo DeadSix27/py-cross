@@ -19,6 +19,7 @@ import sys
 import tarfile
 import urllib.request
 from pprint import pprint as pp
+from colorama import init, Fore, Style
 from typing import List, Tuple, Union
 from urllib.parse import urlparse
 
@@ -29,6 +30,8 @@ import packages
 
 from packages.base_package import BasePackage
 from pathlibex import Path
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 
 class MyLogFormatter(logging.Formatter):
@@ -144,6 +147,7 @@ class CrossCompiler:
             "toolchain_bin_path_two": str(self.toolchainBinPathTwo),
             "mingw_prefix": str(self.mingwPrefixStr),
             "mingw_prefix_dash": str(self.mingwPrefixStrDash),
+            "cmake_toolchain_file": str(self.cmakeToolchainFile),
             "cmake_prefix_options": (
                 f"-DCMAKE_TOOLCHAIN_FILE={self.cmakeToolchainFile}",
                 "-GNinja",
@@ -159,10 +163,12 @@ class CrossCompiler:
                 "--prefix={target_prefix}",
                 "--cross-file={meson_env_file}",
                 "--native-file=" + str(self.mesonNativeFile),
+                "--buildtype=release",
             ),
             "meson_options": (
                 "--cross-file={meson_env_file}",
                 "--native-file=" + str(self.mesonNativeFile),
+                "--buildtype=release",
             ),
             "meson_env_file": str(self.mesonEnvFile),
             "meson_native_file": str(self.mesonNativeFile),
@@ -195,12 +201,13 @@ class CrossCompiler:
 
         parser.add_argument(
             "packages",
-            nargs="+",
+            nargs="*",
             help="Single package or list of package to build",
         )
 
         parser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
         parser.add_argument("-l", "--list", action="store_true", help="List all packages")
+        parser.add_argument("-t", "--test", action="store_true", help="")
         parser.add_argument(
             "-w",
             "--wait",
@@ -225,8 +232,70 @@ class CrossCompiler:
 
             exit()
 
+        if args.test:
+            self.test()
+
         if args.list:
             self.printPackageList()
+
+    def test(self):
+        maxNameLength = len(max(self.packages.keys(), key=len)) +1
+        for (name, pkg) in self.packages.items():
+            pkg: BasePackage
+            link = pkg.url
+            if pkg.source_type != BasePackage.SourceType.Git:
+                continue
+
+            self.get_latest_commit_time(link)
+        exit()
+
+    def time_since_commit(self, commit_time):
+        commit_datetime = datetime.fromisoformat(commit_time[:-1])
+        now = datetime.utcnow()
+        delta = relativedelta(now, commit_datetime)
+        total_days = delta.days + delta.months * 30 + delta.years * 365
+        if total_days <= 7:
+            return f"{Fore.RED}{self.format_timedelta(delta)} ago{Style.RESET_ALL}"
+        else:
+            raise Exception()
+
+
+    def format_timedelta(self, delta):
+        delta_str = ""
+        if delta.years:
+            delta_str += f"{delta.years} year{'s' if delta.years > 1 else ''} "
+        if delta.months:
+            delta_str += f"{delta.months} month{'s' if delta.months > 1 else ''} "
+        if delta.days:
+            delta_str += f"{delta.days} day{'s' if delta.days > 1 else ''} "
+        if delta.hours:
+            delta_str += f"{delta.hours} hour{'s' if delta.hours > 1 else ''} "
+        if delta.minutes:
+            delta_str += f"{delta.minutes} minute{'s' if delta.minutes > 1 else ''} "
+        if delta.seconds:
+            delta_str += f"{delta.seconds} second{'s' if delta.seconds > 1 else ''} "
+        return delta_str.strip()
+
+
+    def get_latest_commit_time(self, repo_url):
+        if "github.com" in repo_url:
+            repo_owner, repo_name = re.findall(r"github\.com\/([A-z0-9\-\_\.]+)\/([A-z0-9\.\-\_]+)", repo_url)[0]
+            repo_name = repo_name.replace(".git", "")
+            api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/commits"
+            headers = {'Authorization': f'Bearer GITHUB_TOKEN'}
+            response = requests.get(api_url, headers=headers)
+            response_json = response.json()
+            if response.status_code == 200:
+                latest_commit_time = response_json[0]['commit']['committer']['date']
+                try:
+                    print(f"{latest_commit_time} - {self.time_since_commit(latest_commit_time)} - {repo_name}")
+                except:
+                    pass
+            else:
+                return f"Error: {response.status_code} - {response_json['message']} - {api_url} - {repo_url}"
+        else:
+            return
+
 
     def printPackageList(self):
         maxNameLength = len(max(self.packages.keys(), key=len)) +1
@@ -306,6 +375,7 @@ class CrossCompiler:
         os.environ["PKG_CONFIG_PATH"] = str(self.pkgConfigPath)
         os.environ["COLOR"] = "ON"  # Force coloring on (for CMake primarily)
         os.environ["CLICOLOR_FORCE"] = "ON"  # Force coloring on (for CMake primarily)
+        # os.environ["CFLAGS"] = "-ggdb -Og"
         # os.environ["CMAKE_SYSTEM_IGNORE_PATH"] = "/;/usr;/usr/local"
 
         # os.environ["MESON_CMAKE_TOOLCHAIN_FILE"] = str(self.cmakeToolchainFile)
@@ -553,7 +623,7 @@ class CrossCompiler:
         cloneCmd.append(cloneUrl)
         cloneCmd.append(str(package.path))
 
-        self.logger.info(f"Cloning {package.name} with '{shlex.join(cloneCmd)}'")
+        self.logger.info(f"Cloning {package.name} with '{shlex.join(self.format_variable_list(cloneCmd))}'")
         self.runProcess(cloneCmd)
 
         if package.git_tag:
@@ -582,7 +652,7 @@ class CrossCompiler:
             os.chdir(_olddir)
             return False
         cmd = ["hg", "clone", "-v", cloneUrl, str(package.path)]
-        self.logger.info(f"Cloning {package.name} with '{shlex.join(cmd)}'")
+        self.logger.info(f"Cloning {package.name} with '{shlex.join(self.format_variable_list(cmd))}'")
         self.runProcess(cmd)
         return True
 
@@ -734,12 +804,17 @@ class CrossCompiler:
                         modified_str,
                     )
             elif cmd:
-                cmd_output = subprocess.check_output(cmd, shell=True).decode().strip()
-                modified_str = re.sub(
-                    r"\!CMD\(" + re.escape(cmd) + r"\)CMD\!",
-                    cmd_output,
-                    modified_str,
-                )
+                try:
+                    cmd_output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT).decode().strip()
+                    modified_str = re.sub(
+                        r"\!CMD\(" + re.escape(cmd) + r"\)CMD\!",
+                        cmd_output,
+                        modified_str,
+                    )
+                except subprocess.CalledProcessError as e:
+                    print(f"Command '{cmd}' failed with error:\n{e.output.decode()}")
+                    sys.exit()
+
         return modified_str  # return the modified string
 
     def format_variable_list(
@@ -1086,12 +1161,12 @@ class CrossCompiler:
 
     def mesonPackage(self, package: BasePackage):
         conf = package.config
-        self.logger.info(f"Mesoning {package.name} with '{' '.join(conf)}'")
+        self.logger.info(f"Mesoning {package.name} with '{' '.join(self.format_variable_list(conf))}'")
         self.runProcess(list(package.meson_command) + list(package.config))
 
     def autoconfPackage(self, package: BasePackage):
         conf = package.config
-        self.logger.info(f"Autoconfing {package.name} with '{' '.join(conf)}'")
+        self.logger.info(f"Autoconfing {package.name} with '{' '.join(self.format_variable_list(conf))}'")
 
         cmd = list(package.autoconf_command)
         mainCmd = cmd[0]
@@ -1107,13 +1182,13 @@ class CrossCompiler:
         pp(list(package.cmake_command) + list(package.config))
 
         conf = package.config
-        self.logger.info(f"C-Making {package.name} with '{' '.join(conf)}'")
+        self.logger.info(f"C-Making {package.name} with '{' '.join(self.format_variable_list(conf))}'")
 
         self.runProcess(list(package.cmake_command) + list(package.config))
 
     def cargoBuildPackage(self, package):
         bconf = package.build
-        self.logger.info(f"Cargo C-Building {package.name} with '{' '.join(bconf)}'")
+        self.logger.info(f"Cargo C-Building {package.name} with '{' '.join(self.format_variable_list(bconf))}'")
         result = subprocess.run(list(package.cargo_command) + list(bconf))
         if result.returncode != 0:
             self.logger.error(f"Command failed with return code {result.returncode}")
@@ -1122,22 +1197,22 @@ class CrossCompiler:
     def autoconfMakePackage(self, package):
         bconf = package.build
         cmd = list(package.make_command) + list(bconf)
-        self.logger.info(f"Autoconf Building {package.name} with '{shlex.join(cmd)}'")
+        self.logger.info(f"Autoconf Building {package.name} with '{shlex.join(self.format_variable_list(cmd))}'")
         self.runProcess(cmd)
 
     def autoconfInstallPackage(self, package):
         iconf = package.install
-        self.logger.info(f"Autoconf Installing {package.name} with '{' '.join(iconf)}'")
+        self.logger.info(f"Autoconf Installing {package.name} with '{' '.join(self.format_variable_list(iconf))}'")
         self.runProcess(list(package.make_install_command) + list(iconf))
 
     def ninjaMakePackage(self, package):
         bconf = package.build
-        self.logger.info(f"Ninja Building {package.name} with '{' '.join(bconf)}'")
+        self.logger.info(f"Ninja Building {package.name} with '{' '.join(self.format_variable_list(bconf))}'")
         self.runProcess(list(package.ninja_command) + list(bconf))
 
     def ninjaInstallPackage(self, package):
         iconf = package.install
-        self.logger.info(f"Ninja Installing {package.name} with '{' '.join(iconf)}'")
+        self.logger.info(f"Ninja Installing {package.name} with '{' '.join(self.format_variable_list(iconf))}'")
         self.runProcess(list(package.ninja_command) + list(iconf))
 
     def applyPatchv2(self, patchData):
@@ -1428,6 +1503,7 @@ class CrossCompiler:
                 f"set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)",
                 f"set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
                 # for shaderc
+                f"set(CMAKE_PREFIX_PATH {self.toolchainPathOne})",
                 f"set(MINGW_COMPILER_PREFIX {self.mingwPrefixStrDash})",
                 # F'set(MINGW_SYSROOT {self.targetSubPrefix})'
             ]
