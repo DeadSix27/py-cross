@@ -11,6 +11,8 @@ class LIBFLAC(BasePackage):
         self.conf_system = BasePackage.ConfSystem.CMake
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
+
+        self.git_tag = "1.4.2"
     
         self.source_subfolder = "_build"
 
