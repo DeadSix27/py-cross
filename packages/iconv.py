@@ -16,11 +16,14 @@ class iconv(BasePackage):
 
     
     def pkg_post_download_commands(self):
-        self.compiler.runProcess(["./gitsub.sh", "pull"])
+        self.compiler.createSymlink(
+            self.compiler.getPackagePathByName("gnulib", True),
+            self.path.joinpath("gnulib"),
+        )
 
     @property
     def pkg_depends(self):
-        return ( )
+        return ["gnulib"]
 
     @property
     def pkg_url(self):
@@ -28,20 +31,20 @@ class iconv(BasePackage):
 
     @property
     def pkg_config(self):
-        return (
+        return [
             "{autoconf_prefix_options}",
             "--build=x86_64-pc-linux-gnu",
             "--disable-nls",
             "--enable-extra-encodings",
-        )
+        ]
 
     @property
     def pkg_build(self):
-        return ()
+        return []
 
     @property
     def pkg_install(self):
-        return ("install",)
+        return ["install"]
 
     @property
     def pkg_info(self):
