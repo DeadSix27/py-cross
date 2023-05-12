@@ -30,7 +30,7 @@ class OPENJPEG(BasePackage): #todo, fix the annoying left behind .exe in lib\cma
 
     @property
     def pkg_depends(self):
-        return ( "zlib", "libpng", "libtiff" )
+        return ( "zlib", "libpng", "libjpeg_turbo", "libtiff" )
     
     @property
     def pkg_url(self):
