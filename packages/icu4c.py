@@ -12,7 +12,9 @@ class ICU4C(BasePackage):
         self.conf_system = BasePackage.ConfSystem.Autoconf
         self.build_system = BasePackage.BuildSystem.Make
         self.install_system = BasePackage.BuildSystem.Make
-    
+
+        self.git_tag = "release-73-rc"
+        
         self.runAutogenInSubSource = True
         self.source_subfolder = "icu4c/source"
 

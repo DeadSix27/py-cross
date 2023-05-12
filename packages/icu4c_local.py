@@ -13,6 +13,8 @@ class ICU4CLOCAL(BasePackage):
         self.build_system = BasePackage.BuildSystem.Make
         self.install_system = BasePackage.BuildSystem.Make
         self.runAutogenInSubSource = True
+        self.git_tag = "release-73-rc"
+        
         self.source_subfolder = "icu4c/source"
        
         # self.patches = [
