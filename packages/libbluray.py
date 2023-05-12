@@ -16,6 +16,16 @@ class LIBBLURAY(BasePackage):
 
         self.autoconf_command = ["../configure"]
 
+        self.regex_replace = {
+            "post_install": [
+                {
+                    0: r"Requires.private:  libxml-2.0 >= ([0-9\.]+) freetype2",
+                    1: r"Requires.private:  libxml-2.0 >= ([0-9\.]+) freetype2\nRequires:  libxml-2.0 freetype2",
+                    "in_file": "{pkg_config_path}/libbluray.pc"
+                },
+            ],
+		}
+
     @property
     def pkg_depends(self):
         return ( "libxml2", "fontconfig", "freetype2" )
