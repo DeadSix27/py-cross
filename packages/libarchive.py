@@ -19,8 +19,19 @@ class libarchive(BasePackage):
         self.regex_replace = {
             "post_install": [
                 {
-                    0: r"Libs.private:  -lz -lbz2 -llzma -llzo2 -lcrypto -liconv -lcharset -lexpat\n",
-                    1: r"Libs.private:  -lz -lbz2 -llzma -llzo2 -lcrypto -lbcrypt -ltls -lws2_32 -liconv -lcharset -lexpat\n",
+                    0: r"Libs.private:[^\n]+\n",
+                    1: r"Libs.private: !CMD(pkg-config --static --libs-only-l zlib libxml-2.0 bzip2 openssl)CMD!\n",
+                    # 1: r"Libs.private:  -lz -lbz2 -llzma -llzo2 -lcrypto -lbcrypt -lws2_32 -liconv -lcharset -lexpat\n",
+                    "in_file": "{pkg_config_path}/libarchive.pc",
+                },
+                {
+                    0: r"Libs: -L\$\{libdir\} -larchive\n",
+                    1: r"Libs: -L${libdir} -larchive !CMD(pkg-config --static --libs-only-l zlib libxml-2.0 bzip2 openssl)CMD!\n",
+                    "in_file": "{pkg_config_path}/libarchive.pc",
+                },
+                {
+                    0: r"Cflags: -I\${includedir}[^\n]+\n",
+                    1: r"Cflags: -I${includedir} -DLIBARCHIVE_STATIC\n",
                     "in_file": "{pkg_config_path}/libarchive.pc",
                 },
             ]
@@ -28,7 +39,7 @@ class libarchive(BasePackage):
 
     @property
     def pkg_depends(self):
-        return ['bzip2', 'expat', 'zlib', 'lzma', "libxml2", 'lzo',]
+        return ['bzip2', 'expat', 'zlib', 'libxml2', 'lzma', 'lzo',]
 
     @property
     def pkg_url(self) -> str:
@@ -38,7 +49,9 @@ class libarchive(BasePackage):
     def pkg_config(self):
         return (
             "..",
-            "{cmake_prefix_options}",
+            "-DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}",
+            "-GNinja",
+            "-DCMAKE_BUILD_TYPE=Release",
             "-DCMAKE_INSTALL_PREFIX={target_prefix}",
             "-DBUILD_SHARED_LIBS=OFF",
 			'-DENABLE_NETTLE=ON',
@@ -68,10 +81,10 @@ class libarchive(BasePackage):
 			'-DENABLE_TEST=OFF',
 			'-DENABLE_COVERAGE=OFF',
 		    # '-DLIBXML2_LIBRARIES=-lxml2 -lz -llzma -liconv -lws2_32',
-            # '-DOPENSSL_CRYPTO_LIBRARY=!CMD(pkg-config --static libcrypto --libs-only-l)CMD!',
-            # '-DOPENSSL_LIBRARIES=!CMD(pkg-config --static openssl --libs-only-l)CMD!',
-            # '-DBZIP2_LIBRARIES=!CMD(pkg-config --static bzip2 --libs-only-l)CMD!',
-			# '-DLIBXML2_LIBRARIES=!CMD(pkg-config --static libxml-2.0 --libs-only-l)CMD!',
+            '-DOPENSSL_CRYPTO_LIBRARY=!CMD(pkg-config --static libcrypto --libs-only-l)CMD!',
+            '-DOPENSSL_LIBRARIES=!CMD(pkg-config --static openssl --libs-only-l)CMD!',
+            '-DBZIP2_LIBRARIES=!CMD(pkg-config --static bzip2 --libs-only-l)CMD!',
+			'-DLIBXML2_LIBRARIES=!CMD(pkg-config --static libxml-2.0 --libs-only-l)CMD!',
             #-lxml2 -lz -llzma -liconv -lws2_32
         )
 
