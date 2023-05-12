@@ -30,7 +30,6 @@ class RUBBERBAND(BasePackage):
             '--prefix={target_prefix}',
             '--cross-file={meson_env_file}',
             '--default-library=static',
-            '--buildtype=release',
             '-Dtests=disabled',
             '-Dcmdline=disabled',
             '-Djni=disabled',
