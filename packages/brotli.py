@@ -20,7 +20,19 @@ class BROTLI(BasePackage):
 					1: r"#if defined(_MSVC)",
 					"in_file": "c/include/brotli/port.h",
 				},
-			]
+			],
+            "post_install": [
+                {
+                    0: r"Requires.private: libbrotlicommon >= ([0-9\.]+)",
+                    1: r"Requires.private: libbrotlicommon >= \1\nRequires: libbrotlicommon",
+                    "in_file": "{pkg_config_path}/libbrotlienc.pc"
+                },
+                {
+                    0: r"Requires.private: libbrotlicommon >= ([0-9\.]+)",
+                    1: r"Requires.private: libbrotlicommon >= \1\nRequires: libbrotlicommon",
+                    "in_file": "{pkg_config_path}/libbrotlidec.pc"
+                }
+            ],
 		}
 
     @property
