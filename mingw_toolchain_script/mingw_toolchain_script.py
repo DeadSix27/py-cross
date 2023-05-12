@@ -122,29 +122,25 @@ SOURCES["binutils"] = {
         "regex": r"binutils-(?P<version_num>[\d.]+)\.tar\.bz2",
     },
 }
-SOURCES["gcc"] = {
-    "type": "archive",
-    "version": "14-20230423",
-    "url": "https://gcc.gnu.org/pub/gcc/snapshots/{version}/gcc-{version}.tar.xz",
-    # 'patches': [
-    # ( 'https://raw.githubusercontent.com/DeadSix27/python_cross_compile_script/master/mingw_toolchain_script/patches/0001-gcc_7_1_0_weak_refs_x86_64.patch', 'p1' ),
-    # ( 'https://raw.githubusercontent.com/DeadSix27/python_cross_compile_script/master/mingw_toolchain_script/patches/0140-gcc-7-Enable-std-experimental-filesystem.patch', 'p1' ), #Unable to get this to work.
-    # ],
-    "softlink_to_package": [
-        ("gmp", "gmp"),
-        ("mpfr", "mpfr"),
-        ("mpc", "mpc"),
-        ("isl", "isl"),
-    ],
-    "builds": [
-        "gcc-1",
-        "gcc-2",
-    ],
-    "update_check": {
-        "url": "https://gcc.gnu.org/pub/gcc/releases/",
-        "type": "httpindex",
-        "regex": r"gcc-(?P<version_num>[\d.]+)",
-    },
+SOURCES['gcc'] = {
+	'type': 'archive',
+	'version'   : '13-20230429',
+	'url' : 'https://gcc.gnu.org/pub/gcc/snapshots/{version}/gcc-{version}.tar.xz',
+	# 'patches': [
+		#( 'https://raw.githubusercontent.com/DeadSix27/python_cross_compile_script/master/mingw_toolchain_script/patches/0001-gcc_7_1_0_weak_refs_x86_64.patch', 'p1' ),
+		# ( 'https://raw.githubusercontent.com/DeadSix27/python_cross_compile_script/master/mingw_toolchain_script/patches/0140-gcc-7-Enable-std-experimental-filesystem.patch', 'p1' ), #Unable to get this to work.
+	# ],
+	'softlink_to_package': [
+		('gmp', 'gmp'),
+		('mpfr', 'mpfr'),
+		('mpc', 'mpc'),
+		('isl', 'isl'),
+	],
+	'builds': [
+		'gcc-1',
+		'gcc-2',
+	],
+	'update_check': {'url': 'https://gcc.gnu.org/pub/gcc/releases/', 'type': 'httpindex', 'regex': r'gcc-(?P<version_num>[\d.]+)'},
 }
 
 
@@ -174,9 +170,9 @@ BUILDS["mingw-w64-headers"] = {
     ' --prefix="{prefix}"'
     " --enable-sdk=all"
     # ' --enable-secure-api'
-    " --enable-idl"
-    " --with-default-msvcrt=msvcrt"
-    " --with-default-win32-winnt=0xA00", #win10
+    " --enable-idl" " --with-default-msvcrt=msvcrt"
+    # ' --with-default-win32-winnt=0x600'	,
+    ,
     "softLinks": [
         ("{prefix}", "./{target}", "./mingw"),
         ("{prefix}/{target}", "../include", "./include"),
@@ -203,7 +199,6 @@ BUILDS["gcc-1"] = {
     " --enable-lto"
     " --enable-checking=release"
     " --enable-seh-exceptions"
-    "--disable-sjlj-exceptions"
     # ' --enable-libada'
     # ' --enable-libssp'
     # ' --enable-gold'
