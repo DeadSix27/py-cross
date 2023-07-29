@@ -13,7 +13,7 @@ class ICU4CLOCAL(BasePackage):
         self.build_system = BasePackage.BuildSystem.Make
         self.install_system = BasePackage.BuildSystem.Make
         self.runAutogenInSubSource = True
-        self.git_tag = "release-73-rc"
+        self.git_tag = "release-73-rc" #todo
         
         self.source_subfolder = "icu4c/source"
        
@@ -34,6 +34,8 @@ class ICU4CLOCAL(BasePackage):
         return {
             'STATIC_PREFIX_WHEN_USED': "",
             'STATIC_PREFIX': "",
+            "CXXFLAGS": "-fext-numeric-literals",
+            "CXX": "g++",
         }
     
     

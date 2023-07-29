@@ -12,6 +12,7 @@ class SPIRV_Headers(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
+        # self.git_tag = "d4461bc88522f286acc8958415e0027e116bbe35"
 
     @property
     def pkg_depends(self):

@@ -28,7 +28,7 @@ class vapoursynth(BasePackage):
 	def pkg_build(self):
 		return (
 			"PREFIX={target_prefix}",
-			"VAPOURSYNTH_VERSION=R62",
+			"VAPOURSYNTH_VERSION=R63",
             "GENDEF=gendef",
             "DLLTOOL={mingw_prefix_dash}dlltool",
 		)

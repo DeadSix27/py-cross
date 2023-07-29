@@ -12,7 +12,7 @@ class FREETYPE2(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
-        self.git_tag = "VER-2-13-0"
+        # self.git_tag = "VER-2-13-0" #todo
 
     @property
     def pkg_depends(self):

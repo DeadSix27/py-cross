@@ -11,6 +11,7 @@ class LIBASS(BasePackage):
         self.conf_system = BasePackage.ConfSystem.Autoconf
         self.build_system = BasePackage.BuildSystem.Make
         self.install_system = BasePackage.BuildSystem.Make
+        # self.git_tag = "077328ca6715e2e2826881003946640f56cb763c" #todo
     
         self.source_subfolder = "_build"
 
@@ -18,7 +19,12 @@ class LIBASS(BasePackage):
 
     @property
     def pkg_depends(self):
-        return ( "fontconfig", "harfbuzz", "freetype2", "fribidi" )
+        return ( 
+            "fontconfig", 
+            "harfbuzz", 
+            "freetype2", 
+            "fribidi" 
+            )
     
     @property
     def pkg_url(self):

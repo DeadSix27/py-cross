@@ -19,7 +19,7 @@ class twolame(BasePackage):
 		self.autogen = False
 
 		self.patches = [
-			{"file": 'twolame/0001-twolame-mingw-workaround.patch'},
+			{"file": "twolame/0001-twolame-mingw-workaround.patch"},
 			{"file": "twolame/0002-only-build-lib.patch"}
 		]
 

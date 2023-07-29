@@ -12,7 +12,8 @@ class LIBJXL(BasePackage): #todo fix missing -lstdc++
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
-        self.git_tag ="v0.8.1"
+        # self.git_tag = "5f3cc36bca9e43cf78aa5b819b74b387c638cac5"
+        # self.git_tag ="v0.8.1" #todo
 
         self.regex_replace = {
 			"post_install": [

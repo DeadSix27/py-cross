@@ -12,6 +12,7 @@ class VULKAN_LOADER(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
+        # self.git_tag = "v1.3.247"
 
         self.regex_replace = {
             'post_install': [
@@ -47,6 +48,7 @@ class VULKAN_LOADER(BasePackage):
     def pkg_config(self):
         return (
             '..',
+            # '--debug-find',
             '{cmake_prefix_options}',
             '-DCMAKE_INSTALL_PREFIX={target_prefix}',
 		    # '-DUPDATE_DEPS=ON',

@@ -14,24 +14,24 @@ class libarchive(BasePackage):
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
         self.patches = [
-            {"file":'libarchive/0001-libarchive-mingw-workaround.patch'}
+            # {"file":'libarchive/0001-libarchive-mingw-workaround.patch'}
         ]
         self.regex_replace = {
             "post_install": [
                 {
                     0: r"Libs.private:[^\n]+\n",
-                    1: r"Libs.private: !CMD(pkg-config --static --libs-only-l zlib libxml-2.0 bzip2 openssl)CMD!\n",
+                    1: r"Libs.private: !CMD(pkg-config --static --libs-only-l zlib libxml-2.0 bzip2 openssl expat lzo2)CMD! -lbcrypt\n",
                     # 1: r"Libs.private:  -lz -lbz2 -llzma -llzo2 -lcrypto -lbcrypt -lws2_32 -liconv -lcharset -lexpat\n",
                     "in_file": "{pkg_config_path}/libarchive.pc",
                 },
                 {
                     0: r"Libs: -L\$\{libdir\} -larchive\n",
-                    1: r"Libs: -L${libdir} -larchive !CMD(pkg-config --static --libs-only-l zlib libxml-2.0 bzip2 openssl)CMD!\n",
+                    1: r"Libs: -L${libdir} -larchive !CMD(pkg-config --static --libs-only-l zlib libxml-2.0 bzip2 openssl)CMD! -lbcrypt\n",
                     "in_file": "{pkg_config_path}/libarchive.pc",
                 },
                 {
-                    0: r"Cflags: -I\${includedir}[^\n]+\n",
-                    1: r"Cflags: -I${includedir} -DLIBARCHIVE_STATIC\n",
+                    0: r"Cflags: -I\${includedir}([^\n]+)?\n",
+                    1: r"Cflags: -I${includedir} -DLIBARCHIVE_STATIC -DLIBXML_STATIC\n",
                     "in_file": "{pkg_config_path}/libarchive.pc",
                 },
             ]
@@ -68,6 +68,7 @@ class libarchive(BasePackage):
 			'-DENABLE_LIBXML2=OFF',
 			'-DENABLE_EXPAT=ON',
 			'-DENABLE_LibGCC=ON',
+            '-DENABLE_UNZIP=OFF',
 			'-DENABLE_CNG=ON',
 			'-DENABLE_TAR=OFF',
 			'-DENABLE_TAR_SHARED=OFF',
@@ -80,7 +81,6 @@ class libarchive(BasePackage):
 			'-DENABLE_ICONV=ON',
 			'-DENABLE_TEST=OFF',
 			'-DENABLE_COVERAGE=OFF',
-		    # '-DLIBXML2_LIBRARIES=-lxml2 -lz -llzma -liconv -lws2_32',
             '-DOPENSSL_CRYPTO_LIBRARY=!CMD(pkg-config --static libcrypto --libs-only-l)CMD!',
             '-DOPENSSL_LIBRARIES=!CMD(pkg-config --static openssl --libs-only-l)CMD!',
             '-DBZIP2_LIBRARIES=!CMD(pkg-config --static bzip2 --libs-only-l)CMD!',

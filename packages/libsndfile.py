@@ -12,7 +12,7 @@ class LIBSNDFILE(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
 
-        self.git_tag = "1.2.0"
+        # self.git_tag = "1.2.0" #todo
 
         self.source_subfolder = "_build"
 

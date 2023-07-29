@@ -1,0 +1,22 @@
+From c309bd996e4028cfe1f51e08e28e04de1c2722c6 Mon Sep 17 00:00:00 2001
+From: DeadSix27 <DeadSix27@users.noreply.github.com>
+Date: Thu, 25 May 2023 17:30:55 +0200
+Subject: [PATCH] Update CMakeLists.txt
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a993012e..40bd2a64 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -117,7 +117,7 @@ add_subdirectory(include)
+ add_subdirectory(src)
+ 
+ # pkg-config file
+-if (UNIX)
++if (MINGW)
+ configure_file(libssh.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libssh.pc)
+ install(
+   FILES

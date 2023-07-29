@@ -11,11 +11,12 @@ class AviSynthPlus(BasePackage):
         self.conf_system = BasePackage.ConfSystem.CMake
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
+        self.git_depth = 0
         
         self.source_subfolder = "_build"
-        self.patches = [
-            { 'file': 'avisynthplus/fix-version.patch' },
-        ]
+        # self.patches = [
+            # { 'file': 'avisynthplus/fix-version.patch' },
+        # ]
 
     @property
     def pkg_url(self):
@@ -32,7 +33,7 @@ class AviSynthPlus(BasePackage):
 
     @property
     def pkg_build(self):
-        return ()
+        return ["VersionGen"]
 
     @property
     def pkg_install(self):

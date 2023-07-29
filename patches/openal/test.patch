@@ -1,0 +1,27 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fe46a68..4c2e36a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -269,14 +269,14 @@ else()
+         $<$<COMPILE_LANGUAGE:CXX>:-Wold-style-cast -Wnon-virtual-dtor -Woverloaded-virtual>)
+ 
+     check_cxx_compiler_flag(-Wno-c++20-attribute-extensions HAVE_WNO_CXX20_ATTR_EXT)
+-    if(HAVE_WNO_CXX20_ATTR_EXT)
+-        set(C_FLAGS ${C_FLAGS} $<$<COMPILE_LANGUAGE:CXX>:-Wno-c++20-attribute-extensions>)
+-    else()
+-        check_cxx_compiler_flag(-Wno-c++20-extensions HAVE_WNO_CXX20_EXT)
+-        if(HAVE_WNO_CXX20_EXT)
+-            set(C_FLAGS ${C_FLAGS} $<$<COMPILE_LANGUAGE:CXX>:-Wno-c++20-extensions>)
+-        endif()
+-    endif()
++    # if(HAVE_WNO_CXX20_ATTR_EXT)
++        # set(C_FLAGS ${C_FLAGS} $<$<COMPILE_LANGUAGE:CXX>:-Wno-c++20-attribute-extensions>)
++    # else()
++        # check_cxx_compiler_flag(-Wno-c++20-extensions HAVE_WNO_CXX20_EXT)
++        # if(HAVE_WNO_CXX20_EXT)
++            # set(C_FLAGS ${C_FLAGS} $<$<COMPILE_LANGUAGE:CXX>:-Wno-c++20-extensions>)
++        # endif()
++    # endif()
+ 
+     if(ALSOFT_WERROR)
+         set(C_FLAGS ${C_FLAGS} -Werror)

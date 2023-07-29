@@ -11,7 +11,7 @@ class OPENMPT(BasePackage):
 		self.conf_system = BasePackage.ConfSystem.Ignore
 		self.build_system = BasePackage.BuildSystem.Make
 		self.install_system = BasePackage.BuildSystem.Make
-		self.git_tag = "libopenmpt-0.6.10"
+		# self.git_tag = "libopenmpt-0.6.10" #todo
 
 		self.make_command = (
 			"make",

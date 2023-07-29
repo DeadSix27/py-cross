@@ -12,9 +12,6 @@ class FRIBIDI(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
-        self.patches = [
-            {"file": "https://github.com/fribidi/fribidi/pull/195.patch" },
-        ]
 
     @property
     def pkg_depends(self):

@@ -12,7 +12,7 @@ class SHADERC(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
-        self.git_tag = "7ba38a34b7ea03fa3e270c55528507575e049c60"
+        # self.git_tag = "7ba38a34b7ea03fa3e270c55528507575e049c60"
         self.regex_replace = {
             "post_install": [
                 {
@@ -51,12 +51,22 @@ class SHADERC(BasePackage):
 
     @property
     def pkg_config(self):
+        # return (
+        #     "..",
+        #     "{cmake_prefix_options}",
+        #     "-DCMAKE_INSTALL_PREFIX={target_prefix}",
+        #     "-DSHADERC_SKIP_TESTS=ON",
+        #     "-DSHADERC_SKIP_EXAMPLES=ON",
+        # )
         return (
             "..",
-            "{cmake_prefix_options}",
+            "-DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}",
+            "-GNinja",
+            "-DCMAKE_BUILD_TYPE=Release",
             "-DCMAKE_INSTALL_PREFIX={target_prefix}",
             "-DSHADERC_SKIP_TESTS=ON",
             "-DSHADERC_SKIP_EXAMPLES=ON",
+            "-DSHADERC_ENABLE_WERROR_COMPILE=OFF",
         )
 
     @property

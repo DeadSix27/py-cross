@@ -124,7 +124,7 @@ SOURCES["binutils"] = {
 }
 SOURCES['gcc'] = {
 	'type': 'archive',
-	'version'   : '13-20230429',
+	'version'   : '14-20230716',
 	'url' : 'https://gcc.gnu.org/pub/gcc/snapshots/{version}/gcc-{version}.tar.xz',
 	# 'patches': [
 		#( 'https://raw.githubusercontent.com/DeadSix27/python_cross_compile_script/master/mingw_toolchain_script/patches/0001-gcc_7_1_0_weak_refs_x86_64.patch', 'p1' ),
@@ -170,9 +170,9 @@ BUILDS["mingw-w64-headers"] = {
     ' --prefix="{prefix}"'
     " --enable-sdk=all"
     # ' --enable-secure-api'
-    " --enable-idl" " --with-default-msvcrt=msvcrt"
-    # ' --with-default-win32-winnt=0x600'	,
-    ,
+    " --enable-idl"
+    " --with-default-msvcrt=ucrt"
+    ' --with-default-win32-winnt=0x0A00',
     "softLinks": [
         ("{prefix}", "./{target}", "./mingw"),
         ("{prefix}/{target}", "../include", "./include"),
@@ -220,7 +220,7 @@ BUILDS["mingw-w64-crt"] = {
     ' --host="{target}"'
     ' --prefix="{prefix}"'
     ' --target="{target}"'
-    " --with-default-msvcrt=msvcrt-os"
+    " --with-default-msvcrt=ucrt"
     " --disable-lib32"
     " --with-sysroot={prefix}",
     "customCommands": [

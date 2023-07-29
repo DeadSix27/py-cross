@@ -11,6 +11,10 @@ class FFMPEG(BasePackage):
         self.conf_system = BasePackage.ConfSystem.Autoconf
         self.build_system = BasePackage.BuildSystem.Make
         self.install_system = BasePackage.BuildSystem.Make
+        # self.patches = [
+            # {"file": "https://github.com/philipl/FFmpeg/commit/b1ee7d70034c8ebacfb55e1e6744835bb1a5d87b.patch"},
+        # ]
+        # self.git_branch = "vulkan"
 
     @property
     def pkg_depends(self):
@@ -19,11 +23,13 @@ class FFMPEG(BasePackage):
             "bzip2",
             "frei0r",
             "libass",
-            "libbluray",
+            # "libbluray",
             "libbs2b",
-            "caca",
+            # "caca",
             "dav1d",
             "xavs",
+            # "libressl",
+            "openssl",
             "xavs2",
             "davs2",
             "fdkaac",
@@ -32,8 +38,8 @@ class FFMPEG(BasePackage):
             "libilbc",
             "libjxl",
             "kvazaar",
-            "lensfun",
-            "mfx",
+            # "lensfun",
+            # "mfx",
             "libmodplug",
             "libmysofa",
             "opencore_amr",
@@ -43,16 +49,16 @@ class FFMPEG(BasePackage):
             "openmpt",
             "libplacebo",
             "rav1e",
-            "rtmpdump",
+            # "rtmpdump",
             "libsamplerate",
             "rubberband",
             "snappy",
             "soxr",
-            "srt",
+            # "srt",
             "svt-av1",
             "svt-vp9",
             "svt-hevc",
-            "tesseract",
+            # "tesseract",
             "theora",
             "vidstab",
             "vo_amrwbenc",
@@ -107,17 +113,17 @@ class FFMPEG(BasePackage):
             "--enable-libfontconfig",
             "--enable-libfreetype",
             "--enable-libfribidi",
-            "--enable-libbluray",
+            # "--enable-libbluray",
             "--enable-libcdio",
             "--enable-avisynth",
             "--enable-vapoursynth",  # maybe works?
-            "--enable-librtmp",
-            "--enable-libcaca",
+            # "--enable-librtmp",
+            # "--enable-libcaca",
             "--enable-iconv",
             "--enable-libxml2",
             # '--enable-gmp',
             "--enable-openssl",
-            "--enable-libtls",
+            # "--enable-libtls",
             # '--enable-gnutls', # nongpl: openssl,libtls(libressl)
             "--enable-vulkan",
             "--enable-libshaderc",
@@ -146,8 +152,8 @@ class FFMPEG(BasePackage):
             "--enable-openal",
             # Subtitle/OCR Libs:
             "--enable-libass",
-            "--enable-libtesseract",
-            "--enable-liblensfun",
+            # "--enable-libtesseract",
+            # "--enable-liblensfun",
             # Image libs
             "--enable-libwebp",
             "--enable-libopenjpeg",
@@ -162,7 +168,7 @@ class FFMPEG(BasePackage):
             "--enable-nvdec",
             "--enable-dxva2",
             "--enable-cuda-nvcc",
-            "--enable-libmfx",
+            # "--enable-libmfx",
             "--enable-amf",
             "--extra-cflags=-DAL_LIBTYPE_STATIC -DMODPLUG_STATIC",
             "--enable-libtwolame",
@@ -174,7 +180,7 @@ class FFMPEG(BasePackage):
             "--enable-libsnappy",
             "--enable-frei0r",
             "--enable-filter=frei0r",
-            "--enable-libsrt",
+            # "--enable-libsrt",
             "--enable-libbs2b",
             # '--enable-libwavpack',
             "--enable-libilbc",

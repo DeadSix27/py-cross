@@ -11,19 +11,29 @@ class LIBFFMPEG(BasePackage):
         self.conf_system = BasePackage.ConfSystem.Autoconf
         self.build_system = BasePackage.BuildSystem.Make
         self.install_system = BasePackage.BuildSystem.Make
+        # self.git_tag = "639ded10e3599b7dd52a4bd7c06589689d177d08"
+        # self.patches = [
+            # {"file": "https://github.com/FFmpeg/FFmpeg/commit/02aeacbb5e77f1c760031dc6426a46671c6d220a.patch", "cmd": "patch -p1 -R"},
+        # ]
+        # self.git_branch = "vulkan"
 
     @property
     def pkg_depends(self):
         return (
+            "shine",
+            # "libssh",
             "avisynth",
             "bzip2",
             "frei0r",
             "libass",
             "libbluray",
             "libbs2b",
-            "caca",
+            # "caca",
             "dav1d",
             "xavs",
+            # "libressl",
+            "opencl_icd",
+            "openssl",
             "xavs2",
             "davs2",
             "fdkaac",
@@ -45,6 +55,7 @@ class LIBFFMPEG(BasePackage):
             "rav1e",
             "rtmpdump",
             "libsamplerate",
+            "freetype2",
             "rubberband",
             "snappy",
             "soxr",
@@ -79,6 +90,7 @@ class LIBFFMPEG(BasePackage):
     @property
     def pkg_url(self):
         return "https://github.com/FFmpeg/FFmpeg"
+        # return "https://github.com/cyanreg/FFmpeg"
 
     @property
     def pkg_config(self):
@@ -97,6 +109,7 @@ class LIBFFMPEG(BasePackage):
             "--enable-version3",
             "--extra-version=xcompile",
             # Misc.
+            "--enable-lcms2",
             "--enable-pic",
             "--enable-bzlib",
             "--enable-zlib",
@@ -111,12 +124,12 @@ class LIBFFMPEG(BasePackage):
             "--enable-avisynth",
             "--enable-vapoursynth",  # maybe works?
             "--enable-librtmp",
-            "--enable-libcaca",
+            # "--enable-libcaca",
             "--enable-iconv",
             "--enable-libxml2",
             # '--enable-gmp',
             "--enable-openssl",
-            "--enable-libtls",
+            # "--enable-libtls",
             # '--enable-gnutls', # nongpl: openssl,libtls(libressl)
             "--enable-vulkan",
             "--enable-libshaderc",
@@ -135,6 +148,8 @@ class LIBFFMPEG(BasePackage):
             "--enable-libxvid",
             "--enable-gray",
             # Audio Libs
+            "--enable-libshine",
+            # "--enable-libssh",
             "--enable-libopus",
             "--enable-libmp3lame",
             "--enable-libvorbis",
@@ -155,7 +170,7 @@ class LIBFFMPEG(BasePackage):
             "--enable-ffnvcodec",
             "--enable-cuvid",
             "--enable-opengl",
-            "--disable-opencl",
+            "--enable-opencl",
             "--enable-d3d11va",
             "--enable-nvenc",
             "--enable-nvdec",
@@ -175,7 +190,6 @@ class LIBFFMPEG(BasePackage):
             "--enable-filter=frei0r",
             "--enable-libsrt",
             "--enable-libbs2b",
-            # '--enable-libwavpack',
             "--enable-libilbc",
             "--enable-libgme",
             #'--enable-libflite', #todo fix this shit

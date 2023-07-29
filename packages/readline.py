@@ -12,7 +12,7 @@ class readline(BasePackage):
         self.build_system = BasePackage.BuildSystem.Make
         self.install_system = BasePackage.BuildSystem.Make
 
-        self.git_branch = "readline-8.2"
+        # self.git_branch = "readline-8.2" #todo
     
         self.patches = [
             {"file": "readline.patch" }

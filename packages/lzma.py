@@ -12,7 +12,7 @@ class LZMA(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
 
-        self.git_tag = "v5.4.2"
+        # self.git_tag = "v5.4.2" #todo
 
         self.source_subfolder = "_build"
 

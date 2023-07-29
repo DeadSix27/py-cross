@@ -16,8 +16,14 @@ class mpv(BasePackage):
         self.patches = [
             {"file": "mpv/ádd-lib-prefix.patch"},
             # ( 'https://github.com/mpv-player/mpv/pull/11494.patch', '-p1'), # win32: add an option to change window affinity #11494 
-            {"file": "https://github.com/mpv-player/mpv/pull/11552.patch"}, #  win32: add window transparency option #11552
-            {"file": "mpv/0001-change-icons.patch", "cmd": "git apply ", },
+            # {"file": "https://github.com/mpv-player/mpv/pull/11552.patch"}, #  win32: add window transparency option #11552
+            # {"file": "https://github.com/mpv-player/mpv/pull/9975.patch" },
+            # {"file": "mpv/0001-change-icons.patch", "cmd": "git apply "  },
+            # {"file": "https://github.com/mpv-player/mpv/pull/11574.patch"},
+            {"file": "https://github.com/mpv-player/mpv/pull/11650.patch"},
+            # {"file": "https://github.com/mpv-player/mpv/pull/11971.patch"},
+            {"file": "https://github.com/mpv-player/mpv/pull/10316.patch"},
+            
         ]
 
         self.regex_replace = {
@@ -58,9 +64,10 @@ class mpv(BasePackage):
             "iconv",
             "python",
             "vapoursynth",
+            # "caca",
             "sdl2",
             "luajit",
-            # 'rubberband',
+            'rubberband',
             "lcms2",
             "libdvdnav",
             "openal",
@@ -75,6 +82,7 @@ class mpv(BasePackage):
             "shaderc",
             "vulkan-loader",
             "libplacebo",
+            "zimg",
         ]
 
     def post_install_commands(self):
@@ -101,9 +109,8 @@ class mpv(BasePackage):
             "--prefix={install_path}/mpv",
             "--default-library=both",
             "--backend=ninja",
-            "--buildtype=release",
             "-Dcdda=enabled",
-            # '-Ddvbin=enabled ',
+            # '-Ddvbin=enabled',
             "-Ddvdnav=enabled",
             "-Diconv=enabled",
             "-Djavascript=enabled",
@@ -112,6 +119,7 @@ class mpv(BasePackage):
             "-Dlibavdevice=enabled",
             "-Dlibbluray=enabled",
             "-Dlua=enabled",
+            "-Dcplayer=true",
             "-Drubberband=enabled",
             "-Dsdl2=enabled",
             "-Dsdl2-gamepad=enabled",
@@ -120,11 +128,11 @@ class mpv(BasePackage):
             "-Dlibplacebo-next=enabled",
             "-Dmanpage-build=disabled",
             "-Dhtml-build=enabled",
-            "-Dpdf-build=enabled",
+            # "-Dpdf-build=disabled",
             "-Dzimg=enabled",
             "-Dzlib=enabled",
             "-Dopenal=enabled",
-            "-Dcaca=enabled",
+            # "-Dcaca=enabled",
             "-Ddirect3d=enabled",
             # '-Degl-angle-win32=enabled ',
             "-Dlibrary-prefix=",
@@ -132,6 +140,7 @@ class mpv(BasePackage):
             "-Dgl-win32=enabled",
             "-Dlibmpv=true",
             "-Doptimization=3",
+            # "-Dpython=enabled",
         ]
 
     @property

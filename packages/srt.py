@@ -12,7 +12,7 @@ class srt(BasePackage):
 		self.build_system = BasePackage.BuildSystem.Ninja
 		self.install_system = BasePackage.BuildSystem.Ninja
 		self.source_subfolder = "_build"
-		self.git_tag = "v1.5.1"
+		# self.git_tag = "v1.5.1" #todo
 
 	@property
 	def pkg_depends(self):

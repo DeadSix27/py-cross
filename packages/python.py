@@ -26,7 +26,7 @@ class PYTHON(BasePackage):
     def pkg_build(self):
         return (
             "PREFIX={target_prefix}",
-            "PYTHON_VERSION=3.11.3",
+            "PYTHON_VERSION=3.11.4",
             "GENDEF=gendef",
             "DLLTOOL={mingw_prefix_dash}dlltool",
         )

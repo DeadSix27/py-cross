@@ -12,7 +12,7 @@ class HIGHWAY(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
-        self.git_tag = "1.0.4"
+        self.git_tag = "1.0.4" #todo
         
 
     @property

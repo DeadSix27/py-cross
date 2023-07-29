@@ -13,7 +13,7 @@ class ICU4C(BasePackage):
         self.build_system = BasePackage.BuildSystem.Make
         self.install_system = BasePackage.BuildSystem.Make
 
-        self.git_tag = "release-73-rc"
+        self.git_tag = "release-73-rc" #todo
         
         self.runAutogenInSubSource = True
         self.source_subfolder = "icu4c/source"
@@ -72,6 +72,7 @@ class ICU4C(BasePackage):
         return {
             'STATIC_PREFIX_WHEN_USED': "",
             'STATIC_PREFIX': "",
+            "CXXFLAGS": "-std=gnu++11 -fext-numeric-literals",
         }
 
     @property

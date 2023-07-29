@@ -1249,7 +1249,7 @@ class CrossCompiler:
             else:
                 fileName = os.path.basename(urlparse(url).path)
                 url = (
-                    "https://raw.githubusercontent.com/DeadSix27/python_cross_compile_script/master/patches"
+                    "https://raw.githubusercontent.com/DeadSix27/py-cross/master/patches/"
                     + url
                 )
                 self.downloadFile(url, fileName)

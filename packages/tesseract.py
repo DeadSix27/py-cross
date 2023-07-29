@@ -11,7 +11,7 @@ class tesseract(BasePackage):
         self.conf_system = BasePackage.ConfSystem.CMake
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
-        self.git_tag = "9422915eb777f1df063838f9a2b4f72ce3aa6e46"
+        # self.git_tag = "9422915eb777f1df063838f9a2b4f72ce3aa6e46" #todo
         self.source_subfolder = "_build"
         self.regex_replace = { #todo fix \include\tesseract\export.h
             "post_patch": [

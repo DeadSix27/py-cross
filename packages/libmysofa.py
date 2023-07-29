@@ -12,6 +12,9 @@ class LIBMYSOFA(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
+        # self.patches = [
+            # {"file": "https://github.com/hoene/libmysofa/pull/199/commits/de6e88aa71d44e407b2331059158ed372931aa22.patch"},
+        # ]
 
     @property
     def pkg_depends(self):
