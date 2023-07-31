@@ -12,6 +12,10 @@ class LIBPLACEBO(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
+        self.patches = [
+            {"file": "https://github.com/haasn/libplacebo/compare/master...DeadSix27:libplacebo:patch-1.patch"},
+            
+        ]
 
     @property
     def pkg_depends(self):
