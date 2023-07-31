@@ -124,7 +124,7 @@ SOURCES["binutils"] = {
 }
 SOURCES['gcc'] = {
 	'type': 'archive',
-	'version'   : '14-20230716',
+	'version'   : '14-20230730',
 	'url' : 'https://gcc.gnu.org/pub/gcc/snapshots/{version}/gcc-{version}.tar.xz',
 	# 'patches': [
 		#( 'https://raw.githubusercontent.com/DeadSix27/python_cross_compile_script/master/mingw_toolchain_script/patches/0001-gcc_7_1_0_weak_refs_x86_64.patch', 'p1' ),
