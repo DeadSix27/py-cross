@@ -108,7 +108,7 @@ class LLVMInstaller:
 		self.buildCompilerRT()
 		self.buildLLVMRuntimes()
 		self.buildMingwLibs()
-		self.buildCompilerRTSanitizer()
+		# self.buildCompilerRTSanitizer()
 		self.buildOpenMP()
 		self.symlinkGCCEH()
 		self.createUnwindPC()

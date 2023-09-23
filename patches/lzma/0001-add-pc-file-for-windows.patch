@@ -17,8 +17,8 @@ index c69b135..80690a1 100644
  
 +set(prefix "${CMAKE_INSTALL_PREFIX}")
 +set(exec_prefix "${CMAKE_INSTALL_PREFIX}")
-+set(libdir "${CMAKE_INSTALL_FULL_LIBDIR}")
-+set(includedir "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
++set(libdir "${CMAKE_INSTALL_PREFIX}/lib")
++set(includedir "${CMAKE_INSTALL_PREFIX}/include")
  
  ######################
  # System definitions #

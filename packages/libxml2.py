@@ -15,18 +15,18 @@ class LIBXML2(BasePackage): #todo, important: fix pkg config file, cuu needs ++ 
         self.source_subfolder = "_build"
 
         self.regex_replace = {
-			"post_install": [
-				{
-					0: r"Libs.private: -lz -llzma  -liconv -licudt -licuin -licuuc  -lws2_32 \n",
-					1: r"Libs.private: -lz -llzma  -liconv -licuin -licuuc -licudt -lstdc++ -lws2_32 \n",
-					"in_file": "{pkg_config_path}/libxml-2.0.pc",
-				},
-				{
-					0: r"Libs: -L\${libdir} -lxml2",
-					1: r"Libs: -L${libdir} -lxml2 -lz -llzma  -liconv -licuin -licuuc -licudt -lstdc++ -lws2_32 \n",
-					"in_file": "{pkg_config_path}/libxml-2.0.pc",
-				},
-			]
+			# "post_install": [
+			# 	{
+			# 		0: r"Libs.private: -lz -llzma  -liconv -licudt -licuin -licuuc  -lws2_32 \n",
+			# 		1: r"Libs.private: -lz -llzma  -liconv -licuin -licuuc -licudt -lstdc++ -lws2_32 \n",
+			# 		"in_file": "{pkg_config_path}/libxml-2.0.pc",
+			# 	},
+			# 	{
+			# 		0: r"Libs: -L\${libdir} -lxml2",
+			# 		1: r"Libs: -L${libdir} -lxml2 -lz -llzma  -liconv -licuin -licuuc -licudt -lstdc++ -lws2_32 \n",
+			# 		"in_file": "{pkg_config_path}/libxml-2.0.pc",
+			# 	},
+			# ]
 		}
 
     @property
