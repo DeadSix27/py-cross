@@ -27,7 +27,7 @@ class LIBTIFF(BasePackage):
 
     @property
     def pkg_depends(self):
-        return ("zlib", "libdeflate", "libwebp", "lzma")  # todo: find JBIG and LERC?
+        return ("zlib-ng", "libdeflate", "libwebp", "lzma")  # todo: find JBIG and LERC?
 
     @property
     def pkg_url(self):

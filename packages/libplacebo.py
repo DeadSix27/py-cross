@@ -12,10 +12,29 @@ class LIBPLACEBO(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
         self.source_subfolder = "_build"
+        self.git_recursive = False
 
     @property
     def pkg_depends(self):
-        return ( 'lcms2', 'libdovi', 'libepoxy', 'spirv-tools', 'glslang', 'shaderc', 'vulkan-loader' )
+        return ( 'fast_float', 'glad', 'xxhash', 'lcms2', 'libdovi', 'libepoxy', 'spirv-tools', 'glslang', 'shaderc', 'vulkan-loader' )
+    
+    def pkg_post_download_commands(self):
+        self.path.joinpath("3rdparty/fast_float").rmdir()
+        self.compiler.createSymlink(
+            self.compiler.getPackagePathByName("fast_float", True),
+            self.path.joinpath("3rdparty/fast_float"),
+        )
+        self.path.joinpath("3rdparty/glad").rmdir()
+        self.compiler.createSymlink(
+            self.compiler.getPackagePathByName("glad", True),
+            self.path.joinpath("3rdparty/glad"),
+        )
+        self.path.joinpath("3rdparty/Vulkan-Headers").rmdir()
+        self.compiler.createSymlink(
+            self.compiler.getPackagePathByName("vulkan-headers", True),
+            self.path.joinpath("3rdparty/Vulkan-Headers"),
+        )
+    
     
     @property
     def pkg_url(self):

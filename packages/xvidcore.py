@@ -13,7 +13,11 @@ class xvidcore(BasePackage):
         self.install_system = BasePackage.BuildSystem.Make
 
         self.autogen = False
-    
+
+        self.patches = [
+            { 'file': 'xvid.patch' },   
+        ]
+
         self.source_subfolder = "build/generic"
         self.autoconf_command = [ "./configure" ]
 

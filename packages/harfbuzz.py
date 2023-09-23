@@ -11,7 +11,7 @@ class HARFBUZZ(BasePackage): #todo: fix stdc++
         self.conf_system = BasePackage.ConfSystem.Meson
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
-        self.git_tag = "1056590f00db7414a289d122f88f68d305c000a5"
+        # self.git_tag = "1056590f00db7414a289d122f88f68d305c000a5"
         self.source_subfolder = "_build"
 
         self.regex_replace = {

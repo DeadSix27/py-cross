@@ -16,6 +16,17 @@ class LIBJXL(BasePackage): #todo fix missing -lstdc++
         # self.git_tag ="v0.8.1" #todo
 
         self.regex_replace = {
+            "post_patch": [
+                
+				{
+					0: r"add_dependencies\(all_tests \$\{all_tests_list\}\)",
+					"in_file": "CMakeLists.txt",
+				},
+				{
+					0: r"add_custom_target\(all_tests\)",
+					"in_file": "CMakeLists.txt",
+				},
+            ],
 			"post_install": [
 				{
 					0: r"Cflags: -I\${includedir}\n",
@@ -37,6 +48,7 @@ class LIBJXL(BasePackage): #todo fix missing -lstdc++
 					1: r"Libs: -L${libdir} -ljxl_threads -lstdc++\n",
 					"in_file": "{pkg_config_path}/libjxl_threads.pc",
 				},
+
 			]
 		}
 

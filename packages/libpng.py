@@ -15,7 +15,7 @@ class LIBPNG(BasePackage):
         self.source_subfolder = "_build"
        
         self.patches = [
-            { 'file': 'libpng/libpng-1.6.39-apng.patch' },
+            { 'file': 'libpng/libpng-1.6.40-apng.patch' },
         ]
 
 
@@ -23,11 +23,11 @@ class LIBPNG(BasePackage):
     def pkg_mirrors(self):
         return [
             {
-                "url": "https://download.sourceforge.net/libpng/libpng-1.6.39.tar.xz",
+                "url": "https://download.sourceforge.net/libpng/libpng-1.6.40.tar.xz",
                 "hashes": [
                     {
-                        "type": "sha256",
-                        "sum": "1f4696ce70b4ee5f85f1e1623dc1229b210029fa4b7aee573df3e2ba7b036937",
+                        "type": "sha1",
+                        "sum": "1c37609e3f0740ae52ca9e2a6adfc9743497b870",
                     },
                 ],
             }
@@ -35,7 +35,7 @@ class LIBPNG(BasePackage):
     
     @property
     def pkg_depends(self):
-        return ("zlib", )
+        return ["zlib-ng",]
     
     @property
     def pkg_config(self):

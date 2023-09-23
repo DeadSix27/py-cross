@@ -47,7 +47,7 @@ class leptonica(BasePackage):
 
     @property
     def pkg_depends(self):
-        return ["zlib", "openjpeg", "libpng", "libwebp", "libjpeg_turbo", "libtiff", "dlfcn-win32"]
+        return ["zlib-ng", "openjpeg", "libpng", "libwebp", "libjpeg_turbo", "libtiff", "dlfcn-win32"]
 
     @property
     def pkg_env(self):

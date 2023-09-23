@@ -1,0 +1,40 @@
+diff --git a/configure.ac b/configure.ac
+index e9a8769..a90a985 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -134,23 +134,6 @@ AS_CASE([$host_cpu],
+ AS_CASE([$host_os],
+         [darwin*], [
+          ASFLAGS="$ASFLAGS -f macho$BITS -DPREFIX"
+-        ],
+-        [cygwin*|msys*|mingw*], [
+-         CFLAGS="$CFLAGS -D__USE_MINGW_ANSI_STDIO=1"
+-         # Fix a bug in mingw gcc where stack doesn't get aligned properly, force all AVX instructions to be unaligned
+-         AS_CASE([$CC], [*gcc],[
+-             AX_CHECK_COMPILE_FLAG([-Wa,-muse-unaligned-vector-move],
+-                 [CFLAGS="-Wa,-muse-unaligned-vector-move $CFLAGS"],
+-                 [AC_MSG_ERROR([-Wa,-muse-unaligned-vector-move not supported, required with mingw+gcc to fix alignment bugs, update the used gcc])]
+-             )
+-         ])
+-         AS_IF(
+-               [test "x$BITS" = "x32"], [
+-                ASFLAGS="$ASFLAGS -fwin32 -DPREFIX -DHAVE_ALIGNED_STACK=0"
+-               ], [
+-                ASFLAGS="$ASFLAGS -fwin64 -DHAVE_ALIGNED_STACK=1"
+-               ]
+-         )
+         ],
+          [midipix*], [
+          AS_IF(
+@@ -163,11 +146,9 @@ AS_CASE([$host_os],
+         ],
+         [linux*|*kfreebsd*], [
+          ASFLAGS="$ASFLAGS -f elf$BITS"
+-         LDFLAGS="$LDFLAGS -Wl,-z,noexecstack"
+          LIBS="$LIBS -lrt"
+         ], [
+          ASFLAGS="$ASFLAGS -f elf$BITS"
+-         LDFLAGS="$LDFLAGS -Wl,-z,noexecstack"
+         ]
+ )
+ 

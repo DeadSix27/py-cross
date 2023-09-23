@@ -1,0 +1,13 @@
+diff --git a/Makefile.am b/Makefile.am
+index f218e9d..5dbcb18 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,7 +1,7 @@
+ 
+ include $(top_srcdir)/build/autotools/common.am
+ 
+-SUBDIRS = kernel caca src examples tools \
++SUBDIRS = kernel caca src \
+           cxx caca-sharp python ruby java doc
+ DIST_SUBDIRS = $(SUBDIRS) build
+ 

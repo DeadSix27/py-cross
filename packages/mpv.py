@@ -14,25 +14,21 @@ class mpv(BasePackage):
         self.source_subfolder = "_build"
 
         self.patches = [
-            {"file": "mpv/ádd-lib-prefix.patch"},
+            {"file": "mpv/0001-add-library-prefix-option.patch"},
+            {"file": "https://github.com/mpv-player/mpv/pull/12452.patch"},
             # ( 'https://github.com/mpv-player/mpv/pull/11494.patch', '-p1'), # win32: add an option to change window affinity #11494 
             # {"file": "https://github.com/mpv-player/mpv/pull/11552.patch"}, #  win32: add window transparency option #11552
             # {"file": "https://github.com/mpv-player/mpv/pull/9975.patch" },
             # {"file": "mpv/0001-change-icons.patch", "cmd": "git apply "  },
             # {"file": "https://github.com/mpv-player/mpv/pull/11574.patch"},
-            {"file": "https://github.com/mpv-player/mpv/pull/11650.patch"},
+            # {"file": "https://github.com/mpv-player/mpv/pull/11650.patch"},
             # {"file": "https://github.com/mpv-player/mpv/pull/11971.patch"},
-            {"file": "https://github.com/mpv-player/mpv/pull/10316.patch"},
-            
+            # {"file": "https://github.com/mpv-player/mpv/pull/10316.patch"},
+            # 
         ]
 
         self.regex_replace = {
             "post_download": [
-                {
-                    0: r"\"--dirty\"",  # dirty.
-                    1: r"",
-                    "in_file": "version.py",
-                },
                 {
                     0: r"bool encoder_encode",
                     1: r"bool mpv_encoder_encode",
@@ -60,7 +56,7 @@ class mpv(BasePackage):
     def pkg_depends(self):
         return [
             "libffmpeg",
-            "zlib",
+            "zlib-ng",
             "iconv",
             "python",
             "vapoursynth",
@@ -87,13 +83,13 @@ class mpv(BasePackage):
 
     def post_install_commands(self):
         self.compiler.runProcess(
-            ["{mingw_prefix_dash}strip", "-v", "{install_path}/mpv/bin/mpv.com"]
+            ["{mingw_prefix_dash}strip", "{install_path}/mpv/bin/mpv.com"]
         )
         self.compiler.runProcess(
-            ["{mingw_prefix_dash}strip", "-v", "{install_path}/mpv/bin/mpv.exe"]
+            ["{mingw_prefix_dash}strip", "{install_path}/mpv/bin/mpv.exe"]
         )
         self.compiler.runProcess(
-            ["{mingw_prefix_dash}strip", "-v", "{install_path}/mpv/bin/mpv-2.dll"]
+            ["{mingw_prefix_dash}strip", "{install_path}/mpv/bin/mpv-2.dll"]
         )
 
     @property
@@ -125,7 +121,7 @@ class mpv(BasePackage):
             "-Dsdl2-gamepad=enabled",
             "-Dsdl2-audio=enabled",
             "-Dvapoursynth=enabled",
-            "-Dlibplacebo-next=enabled",
+            # "-Dlibplacebo=enabled",
             "-Dmanpage-build=disabled",
             "-Dhtml-build=enabled",
             # "-Dpdf-build=disabled",

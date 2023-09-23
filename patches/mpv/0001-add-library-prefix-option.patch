@@ -1,0 +1,38 @@
+From b53365871d44abe3353eb02c438e8c0569920227 Mon Sep 17 00:00:00 2001
+From: DeadSix <DeadSix27@users.noreply.github.com>
+Date: Thu, 7 Sep 2023 19:47:15 +0200
+Subject: [PATCH] add-library-prefix-option
+
+---
+ meson.build       | 2 +-
+ meson_options.txt | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 0786855b0a..a345c11784 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1725,7 +1725,7 @@ client_api_version = major + '.' + minor + '.0'
+ libmpv = library('mpv', sources, dependencies: dependencies, gnu_symbol_visibility: 'hidden',
+                  link_args: cc.get_supported_link_arguments(['-Wl,-Bsymbolic']),
+                  version: client_api_version, include_directories: includedir,
+-                 install: get_option('libmpv'), build_by_default: get_option('libmpv'))
++                 install: get_option('libmpv'), build_by_default: get_option('libmpv'), name_prefix: get_option('library-prefix'))
+ 
+ 
+ if get_option('libmpv')
+diff --git a/meson_options.txt b/meson_options.txt
+index 3e6c8ef929..cff20b602b 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -9,6 +9,7 @@ option('tests', type: 'boolean', value: false, description: 'meson unit tests')
+ option('ta-leak-report', type: 'boolean', value: false, description: 'enable ta leak report by default (development only)')
+ 
+ # misc features
++option('library-prefix', type: 'string', value: 'lib', description: 'libmpv library prefix')
+ option('cdda', type: 'feature', value: 'disabled', description: 'cdda support (libcdio)')
+ option('cplugins', type: 'feature', value: 'auto', description: 'C plugins')
+ option('dvbin', type: 'feature', value: 'disabled', description: 'DVB input module')
+-- 
+2.42.0
+

@@ -11,6 +11,7 @@ class vapoursynth(BasePackage):
 		self.conf_system = BasePackage.ConfSystem.Ignore
 		self.build_system = BasePackage.BuildSystem.Make
 		self.install_system = BasePackage.BuildSystem.Ignore
+		self.git_branch = "llvm"
 
 	@property
 	def pkg_depends(self):
@@ -28,9 +29,9 @@ class vapoursynth(BasePackage):
 	def pkg_build(self):
 		return (
 			"PREFIX={target_prefix}",
-			"VAPOURSYNTH_VERSION=R63",
-            "GENDEF=gendef",
-            "DLLTOOL={mingw_prefix_dash}dlltool",
+			"VAPOURSYNTH_VERSION=R64-RC1",
+			"GENDEF=gendef",
+			"DLLTOOL={mingw_prefix_dash}dlltool",
 		)
 
 	@property

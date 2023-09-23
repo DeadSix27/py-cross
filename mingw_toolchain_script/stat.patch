@@ -1,0 +1,247 @@
+diff --git a/build-all.sh b/build-all.sh
+index 68fecec..adf8621 100755
+--- a/build-all.sh
++++ b/build-all.sh
+@@ -115,5 +115,5 @@ fi
+ ./build-compiler-rt.sh $PREFIX $CFGUARD_ARGS
+ ./build-libcxx.sh $PREFIX $CFGUARD_ARGS
+ ./build-mingw-w64-libraries.sh $PREFIX $CFGUARD_ARGS
+-./build-compiler-rt.sh $PREFIX --build-sanitizers # CFGUARD_ARGS intentionally omitted
++# ./build-compiler-rt.sh $PREFIX --build-sanitizers # CFGUARD_ARGS intentionally omitted
+ ./build-openmp.sh $PREFIX $CFGUARD_ARGS
+diff --git a/build-compiler-rt.sh b/build-compiler-rt.sh
+index 277f1f0..ebe9006 100755
+--- a/build-compiler-rt.sh
++++ b/build-compiler-rt.sh
+@@ -57,7 +57,7 @@ mkdir -p "$PREFIX"
+ PREFIX="$(cd "$PREFIX" && pwd)"
+ export PATH="$PREFIX/bin:$PATH"
+ 
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ 
+ ANY_ARCH=$(echo $ARCHS | awk '{print $1}')
+ CLANG_RESOURCE_DIR="$("$PREFIX/bin/$ANY_ARCH-w64-mingw32-clang" --print-resource-dir)"
+@@ -113,6 +113,16 @@ for arch in $ARCHS; do
+         -DCMAKE_C_COMPILER_WORKS=1 \
+         -DCMAKE_CXX_COMPILER_WORKS=1 \
+         -DCMAKE_C_COMPILER_TARGET=$arch-w64-windows-gnu \
++		-DLIBCXXABI_ENABLE_SHARED=OFF \
++		-DLIBUNWIND_ENABLE_SHARED=OFF \
++		-DCOMPILER_RT_ENABLE_STATIC_UNWINDER=ON \
++		-DCOMPILER_RT_STATIC_CXX_LIBRARY=ON \
++		-DDEFAULT_SANITIZER_USE_STATIC_CXX_ABI=ON \
++		-DDEFAULT_SANITIZER_USE_STATIC_LLVM_UNWINDER=ON \
++		-DSANITIZER_USE_STATIC_CXX_ABI=ON \
++		-DSANITIZER_USE_STATIC_LLVM_UNWINDER=ON \
++		-DDEFAULT_SANITIZER_USE_STATIC_TEST_CXX=ON \
++		-DSANITIZER_USE_STATIC_TEST_CXX=ON \
+         -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
+         -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
+         -DCOMPILER_RT_BUILD_BUILTINS=$BUILD_BUILTINS \
+diff --git a/build-libcxx.sh b/build-libcxx.sh
+index d6a38f3..28011ec 100755
+--- a/build-libcxx.sh
++++ b/build-libcxx.sh
+@@ -17,7 +17,7 @@
+ set -e
+ 
+ BUILD_STATIC=ON
+-BUILD_SHARED=ON
++BUILD_SHARED=OFF
+ CFGUARD_CFLAGS="-mguard=cf"
+ 
+ while [ $# -gt 0 ]; do
+@@ -48,7 +48,7 @@ PREFIX="$(cd "$PREFIX" && pwd)"
+ 
+ export PATH="$PREFIX/bin:$PATH"
+ 
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ 
+ if [ ! -d llvm-project/libunwind ] || [ -n "$SYNC" ]; then
+     CHECKOUT_ONLY=1 ./build-llvm.sh
+diff --git a/build-make.sh b/build-make.sh
+index ed2a6bc..b952bba 100755
+--- a/build-make.sh
++++ b/build-make.sh
+@@ -42,7 +42,7 @@ PREFIX="$(cd "$PREFIX" && pwd)"
+ : ${CORES:=$(nproc 2>/dev/null)}
+ : ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
+ : ${CORES:=4}
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ 
+ download() {
+     if command -v wget >/dev/null; then
+diff --git a/build-mingw-w64-libraries.sh b/build-mingw-w64-libraries.sh
+index 7549be4..3df1536 100755
+--- a/build-mingw-w64-libraries.sh
++++ b/build-mingw-w64-libraries.sh
+@@ -44,7 +44,7 @@ unset CC
+ : ${CORES:=$(nproc 2>/dev/null)}
+ : ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
+ : ${CORES:=4}
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ 
+ if [ ! -d mingw-w64 ] || [ -n "$SYNC" ]; then
+     CHECKOUT_ONLY=1 ./build-mingw-w64.sh
+@@ -58,7 +58,7 @@ for lib in winpthreads winstorecompat; do
+         mkdir -p build-$arch
+         cd build-$arch
+         arch_prefix="$PREFIX/$arch-w64-mingw32"
+-        ../configure --host=$arch-w64-mingw32 --prefix="$arch_prefix" --libdir="$arch_prefix/lib" \
++        ../configure --disable-shared --enable-static --host=$arch-w64-mingw32 --prefix="$arch_prefix" --libdir="$arch_prefix/lib" \
+             CFLAGS="$USE_CFLAGS" \
+             CXXFLAGS="$USE_CFLAGS"
+         make -j$CORES
+diff --git a/build-mingw-w64-tools.sh b/build-mingw-w64-tools.sh
+index 1d23834..79d420b 100755
+--- a/build-mingw-w64-tools.sh
++++ b/build-mingw-w64-tools.sh
+@@ -56,7 +56,7 @@ fi
+ : ${CORES:=$(nproc 2>/dev/null)}
+ : ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
+ : ${CORES:=4}
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ : ${TARGET_OSES:=${TOOLCHAIN_TARGET_OSES-mingw32 mingw32uwp}}
+ 
+ if [ -n "$HOST" ]; then
+@@ -108,7 +108,7 @@ cd mingw-w64-tools/gendef
+ [ -z "$CLEAN" ] || rm -rf build${CROSS_NAME}
+ mkdir -p build${CROSS_NAME}
+ cd build${CROSS_NAME}
+-../configure --prefix="$PREFIX" $CONFIGFLAGS
++../configure --disable-shared --enable-static  --prefix="$PREFIX" $CONFIGFLAGS
+ $MAKE -j$CORES
+ $MAKE install-strip
+ mkdir -p "$PREFIX/share/gendef"
+@@ -117,7 +117,7 @@ cd ../../widl
+ [ -z "$CLEAN" ] || rm -rf build${CROSS_NAME}
+ mkdir -p build${CROSS_NAME}
+ cd build${CROSS_NAME}
+-../configure --prefix="$PREFIX" --target=$ANY_ARCH-w64-mingw32 --with-widl-includedir="$INCLUDEDIR" $CONFIGFLAGS
++../configure --disable-shared --enable-static --prefix="$PREFIX" --target=$ANY_ARCH-w64-mingw32 --with-widl-includedir="$INCLUDEDIR" $CONFIGFLAGS
+ $MAKE -j$CORES
+ $MAKE install-strip
+ mkdir -p "$PREFIX/share/widl"
+diff --git a/build-mingw-w64.sh b/build-mingw-w64.sh
+index 1995c29..05e239b 100755
+--- a/build-mingw-w64.sh
++++ b/build-mingw-w64.sh
+@@ -87,7 +87,7 @@ unset CC
+ : ${CORES:=$(nproc 2>/dev/null)}
+ : ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
+ : ${CORES:=4}
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ 
+ if [ -z "$SKIP_INCLUDE_TRIPLET_PREFIX" ]; then
+     HEADER_ROOT="$PREFIX/generic-w64-mingw32"
+@@ -99,7 +99,7 @@ cd mingw-w64-headers
+ [ -z "$CLEAN" ] || rm -rf build
+ mkdir -p build
+ cd build
+-../configure --prefix="$HEADER_ROOT" \
++../configure --disable-shared --enable-static --prefix="$HEADER_ROOT" \
+     --enable-idl --with-default-win32-winnt=$DEFAULT_WIN32_WINNT --with-default-msvcrt=$DEFAULT_MSVCRT INSTALL="install -C"
+ $MAKE install
+ cd ../..
+@@ -132,7 +132,7 @@ for arch in $ARCHS; do
+         ;;
+     esac
+     FLAGS="$FLAGS --with-default-msvcrt=$DEFAULT_MSVCRT"
+-    ../configure --host=$arch-w64-mingw32 --prefix="$PREFIX/$arch-w64-mingw32" $FLAGS $CFGUARD_FLAGS $CRT_CONFIG_FLAGS
++    ../configure --disable-shared --enable-static  --host=$arch-w64-mingw32 --prefix="$PREFIX/$arch-w64-mingw32" $FLAGS $CFGUARD_FLAGS $CRT_CONFIG_FLAGS
+     $MAKE -j$CORES
+     $MAKE install
+     cd ..
+diff --git a/build-openmp.sh b/build-openmp.sh
+index 5de6246..656e0b7 100755
+--- a/build-openmp.sh
++++ b/build-openmp.sh
+@@ -42,7 +42,7 @@ PREFIX="$(cd "$PREFIX" && pwd)"
+ 
+ export PATH="$PREFIX/bin:$PATH"
+ 
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ 
+ if [ ! -d llvm-project/openmp ] || [ -n "$SYNC" ]; then
+     CHECKOUT_ONLY=1 ./build-llvm.sh
+@@ -91,7 +91,7 @@ for arch in $ARCHS; do
+         -DCMAKE_SYSTEM_NAME=Windows \
+         -DCMAKE_AR="$PREFIX/bin/llvm-ar" \
+         -DCMAKE_RANLIB="$PREFIX/bin/llvm-ranlib" \
+-        -DLIBOMP_ENABLE_SHARED=TRUE \
++        -DLIBOMP_ENABLE_SHARED=FALSE \
+         -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS" \
+         -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS" \
+         $CMAKEFLAGS \
+diff --git a/install-wrappers.sh b/install-wrappers.sh
+index 0ce5663..ac2c3e2 100755
+--- a/install-wrappers.sh
++++ b/install-wrappers.sh
+@@ -36,7 +36,7 @@ fi
+ mkdir -p "$PREFIX"
+ PREFIX="$(cd "$PREFIX" && pwd)"
+ 
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ : ${TARGET_OSES:=${TOOLCHAIN_TARGET_OSES-mingw32 mingw32uwp}}
+ 
+ if [ -n "$HOST" ] && [ -z "$CC" ]; then
+diff --git a/prepare-cross-toolchain-unix.sh b/prepare-cross-toolchain-unix.sh
+index 124d442..d1d0197 100755
+--- a/prepare-cross-toolchain-unix.sh
++++ b/prepare-cross-toolchain-unix.sh
+@@ -23,7 +23,7 @@ fi
+ SRC="$1"
+ DEST="$2"
+ 
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ 
+ CLANG_RESOURCE_DIR="$("$SRC/bin/clang" --print-resource-dir)"
+ CLANG_VERSION=$(basename "$CLANG_RESOURCE_DIR")
+diff --git a/prepare-cross-toolchain.sh b/prepare-cross-toolchain.sh
+index 681186f..afd8d18 100755
+--- a/prepare-cross-toolchain.sh
++++ b/prepare-cross-toolchain.sh
+@@ -24,7 +24,7 @@ SRC="$1"
+ DEST="$2"
+ CROSS_ARCH="$3"
+ 
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ 
+ CLANG_RESOURCE_DIR="$("$SRC/bin/clang" --print-resource-dir)"
+ CLANG_VERSION=$(basename "$CLANG_RESOURCE_DIR")
+diff --git a/release.sh b/release.sh
+index 40bdc72..753b30b 100755
+--- a/release.sh
++++ b/release.sh
+@@ -46,7 +46,7 @@ cleanup() {
+ 
+ trap cleanup EXIT INT TERM
+ 
+-for arch in i686 x86_64 armv7 aarch64; do
++for arch in x86_64; do
+     temp=$(uuidgen)
+     temp_images="$temp_images $temp"
+     time docker build -f Dockerfile.cross --build-arg BASE=mstorsjo/llvm-mingw:dev --build-arg CROSS_ARCH=$arch --build-arg TAG=$TAG-ucrt- --build-arg WITH_PYTHON=1 -t $temp .
+diff --git a/run-tests.sh b/run-tests.sh
+index 0c4b677..2ec1da2 100755
+--- a/run-tests.sh
++++ b/run-tests.sh
+@@ -27,7 +27,7 @@ export PATH=$PREFIX/bin:$PATH
+ : ${CORES:=$(nproc 2>/dev/null)}
+ : ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
+ : ${CORES:=4}
+-: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64}}
++: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64}}
+ 
+ MAKE=make
+ if command -v gmake >/dev/null; then

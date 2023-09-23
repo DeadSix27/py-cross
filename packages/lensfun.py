@@ -12,9 +12,9 @@ class LENSFUN(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
 
-        self.patches = [
-            { 'file': 'lensfun/0001-fix-mingw-building.patch' },   
-        ]
+        # self.patches = [
+            # { 'file': 'lensfun/0001-fix-mingw-building.patch' },   
+        # ]
     
         self.source_subfolder = "_build"
 

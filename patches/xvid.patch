@@ -1,0 +1,12 @@
+diff '--color=auto' -Nur xvidcore.bk/build/generic/configure xvidcore/build/generic/configure
+--- xvidcore.bk/build/generic/configure	2023-09-04 03:48:28.641515889 +0200
++++ xvidcore/build/generic/configure	2023-09-04 03:49:09.870614458 +0200
+@@ -4394,7 +4394,7 @@
+ $as_echo "ok" >&6; }
+ 	STATIC_LIB="xvidcore.\$(STATIC_EXTENSION)"
+ 	SHARED_LIB="xvidcore.\$(SHARED_EXTENSION)"
+-	SPECIFIC_LDFLAGS="-shared -Wl,--dll,--out-implib,\$@.a libxvidcore.def"
++	SPECIFIC_LDFLAGS="-shared -Wl,--out-implib,\$@.a libxvidcore.def"
+ 	SPECIFIC_CFLAGS="-mno-cygwin"
+ 	;;
+      darwin*)

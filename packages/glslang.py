@@ -29,6 +29,7 @@ class GLSLANG(BasePackage):
             '-DCMAKE_INSTALL_PREFIX={target_prefix}',
             '-DBUILD_SHARED_LIBS=OFF',
             '-DENABLE_CTEST=OFF',
+            '-DALLOW_EXTERNAL_SPIRV_TOOLS=ON',
             '-DENABLE_GLSLANG_WEBMIN=OFF',
             '-DBUILD_EXTERNAL=OFF',
             '-DENABLE_GLSLANG_BINARIES=OFF',

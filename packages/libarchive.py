@@ -39,7 +39,7 @@ class libarchive(BasePackage):
 
     @property
     def pkg_depends(self):
-        return ['bzip2', 'expat', 'zlib', 'libxml2', 'lzma', 'lzo',]
+        return ['bzip2', 'expat', 'zlib-ng', 'libxml2', 'lzma', 'lzo',]
 
     @property
     def pkg_url(self) -> str:

@@ -12,18 +12,18 @@ class openal(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
     
-        self.git_tag = "1.23.1"#"471592b258d798bb706ce92c1ccd4d5794999490"
+        # self.git_tag = "1.23.1"#"471592b258d798bb706ce92c1ccd4d5794999490"
         self.source_subfolder = "_build"
         self.regex_replace = {
             "post_install": [
                 {
-                    0: r"Libs.private: -static-libgcc -lwinmm -latomic -lm\n",
-                    1: r"Libs.private: -static-libgcc -lwinmm -latomic -lm -lstdc++\n",
+                    0: r"Libs.private: -static-libgcc -lwinmm -lm\n",
+                    1: r"Libs.private: -static-libgcc -lwinmm -lm -lstdc++\n",
                     "in_file": "{pkg_config_path}/openal.pc",
                 },
                 {
                     0: r"Libs: -L\${libdir} -lOpenAL32[ \n\r]+",
-                    1: r"Libs: -L${libdir} -lOpenAL32 -lwinmm -latomic -lm -lstdc++\n",
+                    1: r"Libs: -L${libdir} -lOpenAL32 -lwinmm -lm -lstdc++\n",
                     "in_file": "{pkg_config_path}/openal.pc",
                 }
             ]

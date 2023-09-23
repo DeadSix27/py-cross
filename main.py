@@ -186,7 +186,7 @@ class CrossCompiler:
         self.sanityCheckPackages()
 
         self.createCargoHome() # we build this first so we do not have to worry about the enviroment being correct.
-        self.buildMinGWToolchain()
+        self.buildLLVMToolchain()
         self.createCmakeToolchainFile()
         self.createMesonEnvFile()
         self.setDefaultEnv()
@@ -374,6 +374,7 @@ class CrossCompiler:
         os.environ["PKG_CONFIG_LIBDIR"] = ""
         os.environ["PKG_CONFIG_PATH"] = str(self.pkgConfigPath)
         os.environ["COLOR"] = "ON"  # Force coloring on (for CMake primarily)
+        os.environ["TERM"] = "xterm"
         os.environ["CLICOLOR_FORCE"] = "ON"  # Force coloring on (for CMake primarily)
         # os.environ["CFLAGS"] = "-ggdb -Og"
         # os.environ["CMAKE_SYSTEM_IGNORE_PATH"] = "/;/usr;/usr/local"
@@ -395,6 +396,7 @@ class CrossCompiler:
             raise ValueError(f"{sourcePath} does not exist")
 
         if targetLinkPath.exists():
+            self.logger.warning(F"Failed Creating Symlink from {sourcePath} to {targetLinkPath}, path exists.")
             return
 
         if sourcePath.is_file():
@@ -410,6 +412,7 @@ class CrossCompiler:
                 str(targetLinkPath),
                 target_is_directory=(link_type == "dir"),
             )
+            self.logger.info(F"Creating Symlink from {sourcePath} to {targetLinkPath}")
         except OSError as e:
             raise OSError(f"Failed to create symlink: {e}")
 
@@ -1569,6 +1572,37 @@ class CrossCompiler:
         m = hashlib.md5()
         m.update(msg)
         return m.hexdigest()
+
+    def buildLLVMToolchain(self):
+        
+        gccBin = f"{self.toolchainBinPathOne}/{self.mingwPrefixStrDash}gcc"
+        if os.path.isfile(gccBin):
+            gccOutput = subprocess.check_output(
+                gccBin + " -v", shell=True, stderr=subprocess.STDOUT
+            ).decode("utf-8")
+
+            workingGcc = re.compile("^clang version .*$", re.MULTILINE).findall(gccOutput)
+            if len(workingGcc) > 0:
+                self.logger.info("MinGW-w64 install is working!")
+                return
+            else:
+                raise Exception("GCC is not working properly, target is not mingw32.")
+                exit(1)
+
+        def toolchainBuildStatus(logMessage):
+            self.logger.info(logMessage)
+
+        mod = importlib.import_module("mingw_toolchain_script.llvm_toolchain_script")
+
+        # from mingw_toolchain_script.mingw_toolchain_script import MinGW64ToolChainBuilder
+
+        toolchainBuilder = mod.LLVMInstaller()
+
+        # toolchainBuilder.setMinGWcheckout("")
+        toolchainBuilder.onStatusUpdate += toolchainBuildStatus
+        toolchainBuilder.build()
+
+        self.buildPackageAndDeps(self.packages["pkg-config"])
 
     def buildMinGWToolchain(self):
         gccBin = f"{self.toolchainBinPathOne}/{self.mingwPrefixStrDash}gcc"

@@ -16,7 +16,7 @@ class LIBDEFLATE(BasePackage):
 
     @property
     def pkg_depends(self):
-        return ( "zlib", ) #todo: find JBIG and LERC?
+        return [ "zlib-ng", ] #todo: find JBIG and LERC?
     
     @property
     def pkg_url(self):

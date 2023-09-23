@@ -19,7 +19,7 @@ class FREETYPE2(BasePackage):
         return (
             "libpng",
             'bzip2',
-            "zlib",
+            "zlib-ng",
             "harfbuzz",
             "brotli"
             )

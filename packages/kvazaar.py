@@ -16,10 +16,31 @@ class KVAZAAR(BasePackage): #todo fix by adding -DKVZ_STATIC_LIB to pkgconfig
     
         # self.source_subfolder = "build/linux"
         self.autoconf_command = [ "./configure" ]
+        self.make_command = [ "make", "V=1" ]
 
         self.patches = [
             { 'file': 'kvazaar/0001-mingw-workaround.patch' },
         ]
+
+
+        self.regex_replace = {
+            "post_patch": [
+				{
+					0: r"cygwin\*\|msys\*\|mingw\*",
+					1: r"cygwin*|msys*",
+					"in_file": "configure.ac",
+				},
+                {
+					0: r'LDFLAGS=\"\$LDFLAGS -Wl,-z,noexecstack\"',
+					1: r'LDFLAGS="$LDFLAGS"',
+					"in_file": "configure.ac",
+				},
+            ],
+        }
+
+
+    def pkg_post_regex_replace_cmd(self):
+        self.compiler.runProcess(["./autogen.sh"])
 
     @property
     def pkg_depends(self):
@@ -34,7 +55,7 @@ class KVAZAAR(BasePackage): #todo fix by adding -DKVZ_STATIC_LIB to pkgconfig
         return (
             '{autoconf_prefix_options}',
             '--build=x86_64-pc-linux-gnu',
-            '--enable-asm',
+            '--disable-asm',
         )
 
     @property

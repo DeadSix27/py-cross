@@ -35,7 +35,7 @@ class libssh(BasePackage):
 
     @property
     def pkg_depends(self):
-        return ["zlib", "openssl"]
+        return ["zlib-ng", "openssl"]
     
     @property
     def pkg_url(self):

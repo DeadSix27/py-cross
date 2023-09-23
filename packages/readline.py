@@ -15,7 +15,8 @@ class readline(BasePackage):
         # self.git_branch = "readline-8.2" #todo
     
         self.patches = [
-            {"file": "readline.patch" }
+            {"file": "readline.patch" },
+            {"file": "readline_2.patch" },
 		]
 
     @property

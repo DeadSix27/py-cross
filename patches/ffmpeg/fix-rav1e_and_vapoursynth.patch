@@ -1,0 +1,26 @@
+diff --git a/configure b/configure
+index bd7f769..8a1233c 100755
+--- a/configure
++++ b/configure
+@@ -6785,7 +6785,7 @@ enabled libopus           && {
+ enabled libplacebo        && require_pkg_config libplacebo "libplacebo >= 4.192.0" libplacebo/vulkan.h pl_vulkan_create
+ enabled libpulse          && require_pkg_config libpulse libpulse pulse/pulseaudio.h pa_context_new
+ enabled librabbitmq       && require_pkg_config librabbitmq "librabbitmq >= 0.7.1" amqp.h amqp_new_connection
+-enabled librav1e          && require_pkg_config librav1e "rav1e >= 0.5.0" rav1e.h rav1e_context_new
++enabled librav1e          && require_pkg_config librav1e "rav1e >= 0.5.0" rav1e.h rav1e_context_new -lstdc++ && append librav1e_extralibs "-lstdc++"
+ enabled librist           && require_pkg_config librist "librist >= 0.2.7" librist/librist.h rist_receiver_create
+ enabled librsvg           && require_pkg_config librsvg librsvg-2.0 librsvg-2.0/librsvg/rsvg.h rsvg_handle_render_cairo
+ enabled librtmp           && require_pkg_config librtmp librtmp librtmp/rtmp.h RTMP_Socket
+diff --git a/libavformat/vapoursynth.c b/libavformat/vapoursynth.c
+index 1578a6a..3a30d0a 100644
+--- a/libavformat/vapoursynth.c
++++ b/libavformat/vapoursynth.c
+@@ -36,6 +36,8 @@
+ #include "libavutil/pixdesc.h"
+ #include "avformat.h"
+ #include "internal.h"
++#include "libavutil/frame.h"
++#include "libavutil/buffer.h"
+ 
+ struct VSState {
+     VSScript *vss;

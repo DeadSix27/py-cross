@@ -1,0 +1,39 @@
+diff --git a/openmp/runtime/CMakeLists.txt b/openmp/runtime/CMakeLists.txt
+index 2b7a3eb5b..81a99d546 100644
+--- a/openmp/runtime/CMakeLists.txt
++++ b/openmp/runtime/CMakeLists.txt
+@@ -296,9 +296,9 @@ endif()
+ set(LIBOMP_ENABLE_SHARED TRUE CACHE BOOL
+   "Shared library instead of static library?")
+ 
+-if(WIN32 AND NOT LIBOMP_ENABLE_SHARED)
+-  libomp_error_say("Static libraries requested but not available on Windows")
+-endif()
++# if(WIN32 AND NOT LIBOMP_ENABLE_SHARED)
++  # libomp_error_say("Static libraries requested but not available on Windows")
++# endif()
+ 
+ if(LIBOMP_USE_ITT_NOTIFY AND NOT LIBOMP_ENABLE_SHARED)
+   message(STATUS "ITT Notify not supported for static libraries - forcing ITT Notify off")
+diff --git a/openmp/runtime/src/CMakeLists.txt b/openmp/runtime/src/CMakeLists.txt
+index bb5822264..9e2cb005f 100644
+--- a/openmp/runtime/src/CMakeLists.txt
++++ b/openmp/runtime/src/CMakeLists.txt
+@@ -194,7 +194,7 @@ if(OPENMP_MSVC_NAME_SCHEME)
+  )
+ else()
+   set_target_properties(omp PROPERTIES
+-    PREFIX "" SUFFIX "" OUTPUT_NAME "${LIBOMP_LIB_FILE}"
++    PREFIX "" SUFFIX "" OUTPUT_NAME "${LIBOMP_IMP_LIB_FILE}"
+     LINK_FLAGS "${LIBOMP_CONFIGURED_LDFLAGS}"
+     LINKER_LANGUAGE ${LIBOMP_LINKER_LANGUAGE}
+   )
+@@ -259,7 +259,7 @@ if(WIN32)
+     endif()
+   else()
+     set(LIBOMP_IMP_LIB_FILE ${LIBOMP_LIB_NAME}${CMAKE_IMPORT_LIBRARY_SUFFIX})
+-    set(LIBOMP_GENERATED_IMP_LIB_FILENAME ${LIBOMP_LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX})
++    set(LIBOMP_GENERATED_IMP_LIB_FILENAME ${LIBOMP_LIB_FILE}) #${CMAKE_STATIC_LIBRARY_SUFFIX}
+   endif()
+   set_target_properties(omp PROPERTIES
+     VERSION ${LIBOMP_VERSION_MAJOR}.${LIBOMP_VERSION_MINOR} # uses /version flag

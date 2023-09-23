@@ -33,7 +33,7 @@ class GME(BasePackage):
     
     @property
     def pkg_depends(self):
-        return ("zlib",)
+        return ["zlib-ng"]
     
     @property
     def pkg_config(self):

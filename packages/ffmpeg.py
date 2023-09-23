@@ -19,6 +19,7 @@ class FFMPEG(BasePackage):
     @property
     def pkg_depends(self):
         return (
+            "zlib-ng",
             "avisynth",
             "bzip2",
             "frei0r",

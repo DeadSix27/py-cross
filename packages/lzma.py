@@ -12,13 +12,14 @@ class LZMA(BasePackage):
         self.build_system = BasePackage.BuildSystem.Ninja
         self.install_system = BasePackage.BuildSystem.Ninja
 
-        # self.git_tag = "v5.4.2" #todo
+        self.git_tag = "e3288fdb45c580cb849f6799cf419c4922004ae5"
 
         self.source_subfolder = "_build"
 
 
         self.patches = [
-            { 'file': 'lzma.patch' },
+            { 'file': 'lzma/0001-add-pc-file-for-windows.patch' },
+            { 'file': 'lzma/0002-temp-llvm-build-fix.patch' },
         ]
 
         

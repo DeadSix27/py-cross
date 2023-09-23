@@ -61,7 +61,7 @@ class tesseract(BasePackage):
 
     @property
     def pkg_depends(self):
-        return ['leptonica', 'libxml2', 'zlib', 'libarchive', 'libtiff']
+        return ['leptonica', 'libxml2', 'zlib-ng', 'libarchive', 'libtiff']
 
     @property
     def pkg_url(self) -> str:

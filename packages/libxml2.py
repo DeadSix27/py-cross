@@ -31,7 +31,7 @@ class LIBXML2(BasePackage): #todo, important: fix pkg config file, cuu needs ++ 
 
     @property
     def pkg_depends(self):
-        return ( "bzip2", "zlib", "lzma", "iconv", "icu4c" )
+        return ( "bzip2", "zlib-ng", "lzma", "iconv", "icu4c" )
 
     @property
     def pkg_url(self):

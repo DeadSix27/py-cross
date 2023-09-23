@@ -1,0 +1,36 @@
+diff '--color=auto' -Nur readline.orig/input.c readline/input.c
+--- readline.orig/input.c	2023-09-04 00:21:22.136878464 +0200
++++ readline/input.c	2023-09-04 00:22:41.337548358 +0200
+@@ -113,6 +113,32 @@
+ #define WIN32_LEAN_AND_MEAN 1
+ #include <windows.h>
+ 
++static UINT_PTR timerID = 0;
++
++unsigned int alarm(unsigned int seconds) {
++    if (timerID != 0) {
++        KillTimer(NULL, timerID);
++        timerID = 0;
++    }
++
++    if (seconds > 0) {
++        timerID = SetTimer(NULL, 0, seconds * 1000, NULL);
++    }
++
++    return 0;  // Return 0 to indicate success.
++}
++int ioctl(int fd, int request, void *arg) {
++    if (request == FIONREAD) {
++        DWORD chars_avail;
++        if (PeekNamedPipe((HANDLE)_get_osfhandle(fd), NULL, 0, NULL, &chars_avail, NULL)) {
++            *(int *)arg = chars_avail;
++            return 0;
++        }
++    }
++    // Handle other requests if needed.
++    return -1;  // Return error for unsupported requests.
++}
++
+ int
+ win32_isatty (int fd)
+ {

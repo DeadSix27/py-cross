@@ -41,7 +41,7 @@ class rtmpdump(BasePackage):
         return [
             # "libressl",
             "openssl",
-            "zlib"
+            "zlib-ng"
         ]
 
     @property

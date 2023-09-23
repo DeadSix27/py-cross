@@ -7,7 +7,7 @@ class zvbi(BasePackage):
     def __init__(self, compiler):
         self.compiler = compiler
         self.type = BasePackage.PackageType.Dependecy
-        self.source_type = BasePackage.SourceType.Archive
+        self.source_type = BasePackage.SourceType.Git
         self.conf_system = BasePackage.ConfSystem.Autoconf
         self.build_system = BasePackage.BuildSystem.Make
         self.install_system = BasePackage.BuildSystem.Make
@@ -17,9 +17,13 @@ class zvbi(BasePackage):
         # self.source_subfolder = "build/generic"
         # self.autoconf_command = [ "./configure" ]
         self.patches = [
-            {"file": "zvbi/0001-zvbi-0.2.35_win32.patch"},
-            {"file": "zvbi/0002-zvbi-0.2.35_ioctl.patch"},
-            {"file": "zvbi/0003-build-only-src.patch"},
+            {"cmd": "git am --3way", "file": "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0001-ssize_max.patch"},
+            {"cmd": "git am --3way", "file": "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0002-ioctl.patch"},
+            {"cmd": "git am --3way", "file": "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0003-fix-static-linking.patch"},
+            {"cmd": "git am --3way", "file": "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0004-win32.patch"},
+            {"cmd": "git am --3way", "file": "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0005-win32-undefined.patch"},
+            {"cmd": "git am --3way", "file": "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0006-skip-directory.patch"},
+            {"cmd": "git am --3way", "file": "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0007-fix-clang-compilation-on-i686.patch"},
         ]
 
     @property
@@ -43,27 +47,8 @@ class zvbi(BasePackage):
         return ["iconv", "dlfcn-win32", "libpng"]
 
     @property
-    def pkg_mirrors(self):
-        return (
-            {
-                "url": "https://sourceforge.net/projects/zapping/files/zvbi/0.2.35/zvbi-0.2.35.tar.bz2",
-                "hashes": [
-                    {
-                        "type": "sha256",
-                        "sum": "fc883c34111a487c4a783f91b1b2bb5610d8d8e58dcba80c7ab31e67e4765318",
-                    },
-                ],
-            },
-            {
-                "url": "https://download.videolan.org/contrib/zvbi/zvbi-0.2.35.tar.bz2",
-                "hashes": [
-                    {
-                        "type": "sha256",
-                        "sum": "fc883c34111a487c4a783f91b1b2bb5610d8d8e58dcba80c7ab31e67e4765318",
-                    },
-                ],
-            },
-        )
+    def pkg_url(self) -> str:
+        return "https://github.com/zapping-vbi/zvbi.git"
 
     @property
     def pkg_config(self):

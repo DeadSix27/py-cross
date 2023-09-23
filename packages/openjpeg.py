@@ -30,7 +30,7 @@ class OPENJPEG(BasePackage): #todo, fix the annoying left behind .exe in lib\cma
 
     @property
     def pkg_depends(self):
-        return ( "zlib", "libpng", "libjpeg_turbo", "libtiff" )
+        return ( "zlib-ng", "libpng", "libjpeg_turbo", "libtiff" )
     
     @property
     def pkg_url(self):
@@ -44,6 +44,7 @@ class OPENJPEG(BasePackage): #todo, fix the annoying left behind .exe in lib\cma
             '-DCMAKE_INSTALL_PREFIX={target_prefix}',
             '-DBUILD_SHARED_LIBS=OFF',
             '-DBUILD_STATIC_LIBS=ON',
+            '-DBUILD_PKGCONFIG_FILES=ON',
             )
 
     @property

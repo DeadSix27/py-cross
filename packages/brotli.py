@@ -49,6 +49,7 @@ class BROTLI(BasePackage):
             '..',
             '{cmake_prefix_options}',
             '-DCMAKE_INSTALL_PREFIX={target_prefix}',
+            '-DSHARE_INSTALL_PREFIX={target_prefix}/share'
 			'-DBUILD_SHARED_LIBS=OFF',
 			'-DBROTLI_EMSCRIPTEN=OFF',
             )
