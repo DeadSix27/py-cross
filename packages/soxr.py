@@ -41,7 +41,6 @@ class soxr(BasePackage):
 			'-DWITH_LSR_BINDINGS=OFF',
 			'-DBUILD_LSR_TESTS=OFF',
 			'-DBUILD_EXAMPLES=OFF',
-			'-DBUILD_SHARED_LIBS=OFF',
 			'-DBUILD_TESTS=OFF',
 			'-DCMAKE_AR={toolchain_bin_path_one}/{mingw_prefix_dash}ar',
 			)

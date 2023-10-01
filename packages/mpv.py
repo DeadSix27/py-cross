@@ -15,7 +15,7 @@ class mpv(BasePackage):
 
         self.patches = [
             {"file": "mpv/0001-add-library-prefix-option.patch"},
-            {"file": "https://github.com/mpv-player/mpv/pull/12452.patch"},
+            # {"file": "https://github.com/mpv-player/mpv/pull/12452.patch"},
             # ( 'https://github.com/mpv-player/mpv/pull/11494.patch', '-p1'), # win32: add an option to change window affinity #11494 
             # {"file": "https://github.com/mpv-player/mpv/pull/11552.patch"}, #  win32: add window transparency option #11552
             # {"file": "https://github.com/mpv-player/mpv/pull/9975.patch" },
@@ -28,28 +28,28 @@ class mpv(BasePackage):
         ]
 
         self.regex_replace = {
-            "post_download": [
-                {
-                    0: r"bool encoder_encode",
-                    1: r"bool mpv_encoder_encode",
-                    "in_file": "common/encode_lavc.c",
-                },
-                {
-                    0: r"bool encoder_encode",
-                    1: r"bool mpv_encoder_encode",
-                    "in_file": "common/encode_lavc.h",
-                },
-                {
-                    0: r"encoder_encode",
-                    1: r"mpv_encoder_encode",
-                    "in_file": "video/out/vo_lavc.c",
-                },
-                {
-                    0: r"encoder_encode",
-                    1: r"mpv_encoder_encode",
-                    "in_file": "audio/out/ao_lavc.c",
-                },
-            ],
+            # "post_download": [
+            #     {
+            #         0: r"bool encoder_encode",
+            #         1: r"bool mpv_encoder_encode",
+            #         "in_file": "common/encode_lavc.c",
+            #     },
+            #     {
+            #         0: r"bool encoder_encode",
+            #         1: r"bool mpv_encoder_encode",
+            #         "in_file": "common/encode_lavc.h",
+            #     },
+            #     {
+            #         0: r"encoder_encode",
+            #         1: r"mpv_encoder_encode",
+            #         "in_file": "video/out/vo_lavc.c",
+            #     },
+            #     {
+            #         0: r"encoder_encode",
+            #         1: r"mpv_encoder_encode",
+            #         "in_file": "audio/out/ao_lavc.c",
+            #     },
+            # ],
         }
 
     @property
@@ -60,7 +60,7 @@ class mpv(BasePackage):
             "iconv",
             "python",
             "vapoursynth",
-            # "caca",
+            "caca",
             "sdl2",
             "luajit",
             'rubberband',
@@ -82,12 +82,15 @@ class mpv(BasePackage):
         ]
 
     def post_install_commands(self):
+        self.compiler.logger.info("Stripping mpv.com")
         self.compiler.runProcess(
             ["{mingw_prefix_dash}strip", "{install_path}/mpv/bin/mpv.com"]
         )
+        self.compiler.logger.info("Stripping mpv.exe")
         self.compiler.runProcess(
             ["{mingw_prefix_dash}strip", "{install_path}/mpv/bin/mpv.exe"]
         )
+        self.compiler.logger.info("Stripping mpv-2.dll")
         self.compiler.runProcess(
             ["{mingw_prefix_dash}strip", "{install_path}/mpv/bin/mpv-2.dll"]
         )
@@ -103,6 +106,7 @@ class mpv(BasePackage):
             "{meson_options}",
             "--default-library=static",
             "--prefix={install_path}/mpv",
+            # "--prefix={target_prefix}",
             "--default-library=both",
             "--backend=ninja",
             "-Dcdda=enabled",
@@ -128,7 +132,7 @@ class mpv(BasePackage):
             "-Dzimg=enabled",
             "-Dzlib=enabled",
             "-Dopenal=enabled",
-            # "-Dcaca=enabled",
+            "-Dcaca=enabled",
             "-Ddirect3d=enabled",
             # '-Degl-angle-win32=enabled ',
             "-Dlibrary-prefix=",

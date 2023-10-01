@@ -81,6 +81,8 @@ class CrossCompiler:
         )
         hdlr.setFormatter(fmt)
 
+        self.cmdLineArgs = None
+
         self.packages: dict[str, BasePackage] = {}
 
         self.packagesBuilt: dict[str, bool] = {}
@@ -205,7 +207,9 @@ class CrossCompiler:
             help="Single package or list of package to build",
         )
 
+        parser.add_argument("-sd", '--skip-dependencies', action="store_true", help="Skip dependencies")
         parser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
+        parser.add_argument("-de", "--dependends", nargs='?', help="List all what packages depend on a package")
         parser.add_argument("-l", "--list", action="store_true", help="List all packages")
         parser.add_argument("-t", "--test", action="store_true", help="")
         parser.add_argument(
@@ -215,11 +219,11 @@ class CrossCompiler:
             help="Wait after each build step until confirmation",
         )
 
-        args = parser.parse_args()
+        self.cmdLineArgs = parser.parse_args()
 
-        if args.packages and len(args.packages):
+        if self.cmdLineArgs.packages and len(self.cmdLineArgs.packages):
             non_existing = []
-            for p in args.packages:
+            for p in self.cmdLineArgs.packages:
                 p = p.lower()
                 if not p in self.packages:
                     non_existing.append(p)
@@ -228,15 +232,28 @@ class CrossCompiler:
                     f"The package(s): {'; '.join([f'<u>{s}</u>' for s in non_existing])}, do not exist."
                 )
                 exit(1)
-            self.buildBackageList(args.packages)
+            self.buildBackageList(self.cmdLineArgs.packages)
 
             exit()
 
-        if args.test:
+        if self.cmdLineArgs.dependends:
+            self.findDependends()
+        
+        if self.cmdLineArgs.test:
             self.test()
 
-        if args.list:
+        if self.cmdLineArgs.list:
             self.printPackageList()
+
+    def findDependends(self):
+
+        pkgName = self.cmdLineArgs.dependends
+
+        for (name, pkg) in self.packages.items():
+            pkg: BasePackage
+            if pkgName in pkg.depends:
+                print(name)
+        exit()
 
     def test(self):
         maxNameLength = len(max(self.packages.keys(), key=len)) +1
@@ -349,7 +366,7 @@ class CrossCompiler:
                 raise Exception(f"Error building {pkg.name}: circular dependency detected.")
         self.packagesBuilt[pkg.name] = False
 
-        if len(pkg.depends) > 0:
+        if len(pkg.depends) > 0 and not self.cmdLineArgs.skip_dependencies:
             self.logger.info(f"{pkg.name} depends on {pkg.depends}")
             for pkg_name in pkg.depends:
                 if pkg_name not in self.packages:

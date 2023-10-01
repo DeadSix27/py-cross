@@ -30,7 +30,6 @@ class libsamplerate(BasePackage):
             '-DBUILD_SHARED_LIBS=OFF',
 			'-DLIBSAMPLERATE_EXAMPLES=OFF',
             '-DBUILD_TESTING=OFF',
-            '-DBUILD_SHARED_LIBS=OFF',
             )
 
     @property

@@ -68,7 +68,6 @@ class leptonica(BasePackage):
             "-DBUILD_SHARED_LIBS=OFF",
             "-DSW_BUILD=0",
             "-DBUILD_PROG=OFF",
-            "-DBUILD_SHARED_LIBS=OFF",
             "-DSTATIC=1",
             "-DLIBRARY_TYPE=STATIC",
         )

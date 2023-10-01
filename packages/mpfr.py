@@ -26,7 +26,7 @@ class mpfr(BasePackage):
 	def pkg_mirrors(self):
 		return [
 			{
-				"url": "https://www.mpfr.org/mpfr-current/mpfr-4.2.0.tar.bz2",
+				"url": "https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.xz",
 				"hashes": [
 					{
 						"type": "sha256",
